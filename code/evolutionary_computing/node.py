@@ -2,6 +2,9 @@ from dataclasses import dataclass
 from typing import *
 import numpy as np
 
+newline = "\n"
+tab = "\t"
+
 
 @dataclass
 class TerminalValue:
@@ -13,7 +16,16 @@ class Node:
     Base class of a node. Could be either a Function or Terminal.
     """
     def __init__(self, parent):
-        self.p = parent
+        self.p = None
+        self.children = False
+        self.depth = 0
+        self.update_parent(parent)
+
+    def update_parent(self, new_parent):
+        self.p = new_parent
+        self.update_depth()
+
+    def update_depth(self):
         self.depth = 0 if not self.p else self.p.get_depth() + 1
 
     def get_depth(self) -> int:
@@ -21,6 +33,12 @@ class Node:
 
     def evaluate(self) -> float:
         pass
+
+    def get_node_count(self) -> int:
+        pass
+
+    def get_reference_list(self) -> list:
+        return [self]
 
 
 class FunctionNode(Node):
@@ -42,10 +60,24 @@ class FunctionNode(Node):
     def evaluate(self) -> float:
         return self.f(*[c.evaluate() for c in self.children])
 
+    def get_node_count(self) -> int:
+        return 1 + sum([c.get_node_count() for c in self.children])
+
+    def update_depth(self):
+        super().update_depth()
+
+        if self.children:
+            for c in self.children:
+                c.update_depth()
+
+    def get_reference_list(self) -> list:
+        ls = super().get_reference_list()
+        for c in self.children:
+            ls.extend(c.get_reference_list())
+        return ls
+
     def __repr__(self) -> str:
-        newline = "\n"
-        tab = "\t"
-        return f"{tab * self.depth}- Function[{self.depth}]: {self.f}\n{tab * self.depth}{(newline + tab * self.depth).join([str(c) for c in self.children])}"
+        return "\t"*self.depth + f"- Function[{self.depth}]: {self.f}\n{newline.join([str(c) for c in self.children])}"
 
 
 class TerminalNode(Node):
@@ -61,5 +93,8 @@ class TerminalNode(Node):
     def evaluate(self) -> float:
         return self.value.v
 
+    def get_node_count(self) -> int:
+        return 1
+
     def __repr__(self) -> str:
-        return f"\t- Terminal: {self.value.v}"
+        return "\t"*self.depth + f"- Terminal: {self.value.v}"
