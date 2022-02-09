@@ -17,7 +17,9 @@ class Function:
         return self.f(*[c.evaluate() for c in self.children])
 
     def __repr__(self):
-        return f"Function[{self.depth}], {self.f}"
+        newline = "\n"
+        tab = "\t"
+        return f"{tab*self.depth}Function[{self.depth}]: {self.f},\n{tab*self.depth}{(newline + tab*self.depth).join([str(c) for c in self.children])}"
 
 
 class Terminal:
@@ -46,9 +48,11 @@ def rand_func(parent, terminal=Terminal(0)):
     return Function(parent=parent, function=f, children=[terminal]*f[1])
 
 terminal = Terminal(5)
+terminal.depth = 2
 
 root = rand_func(None, terminal)
 
 root.children = [rand_func(root, terminal) for _ in range(root.arity)]
 
-pass
+print(root)
+print(f"\n{root.evaluate()}")
