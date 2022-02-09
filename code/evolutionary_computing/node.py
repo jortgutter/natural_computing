@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import *
 import numpy as np
 
 
@@ -22,7 +22,7 @@ class FunctionNode(Node):
     A Node representing a unary or binary operator.
     The function of the Node is randomly selected from a list of functions.
     """
-    def __init__(self, parent, functions, max_depth: int = 0):
+    def __init__(self, parent, functions: List[Tuple[Any, int]], max_depth: int = 0):
         super().__init__(parent)
 
         f_idx = np.random.choice(range(len(functions)))
