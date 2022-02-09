@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from tree import Tree
+from tqdm import tqdm
 from node import *
+import copy
 
 
 def load_data(filename):
@@ -10,14 +12,23 @@ def load_data(filename):
     return xs, ys
 
 
-def get_predictions(tree: Node, terminal_value: TerminalValue, x_vals: List[float]) -> List[float]:
+def get_predictions(tree: Tree, terminal_value: TerminalValue, x_vals: List[float]) -> List[float]:
     results = []
 
     for x in x_vals:
         terminal_value.v = x
-        results.append(tree.evaluate())
+        results.append(tree.root.evaluate())
 
     return results
+
+
+def plot_predictions(tree: Tree, xs: List[float], ys: List[float]):
+    res = get_predictions(tree, term_val, xs)
+
+    plt.plot(xs, ys, label="True", c="green")
+    plt.plot(xs, res, label="Estimated", c="black")
+    plt.legend()
+    plt.show()
 
 
 def crossover(tree1: Tree, tree2: Tree):
@@ -32,8 +43,6 @@ def crossover(tree1: Tree, tree2: Tree):
     # Retrieve Node objects
     node1 = refs1[node1_idx]
     node2 = refs2[node2_idx]
-
-    print(f"Crossover:\n{node1}\nand\n{node2}")
 
     # Retrieve Node parents
     parent1 = node1.p
@@ -81,30 +90,56 @@ functions = [
 ]
 
 xs, ys = load_data("data_ex8.txt")
-
 term_val = TerminalValue(0)
-# root = FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=3)
-# print(root)
-# print(f"\nNumber of nodes: {root.get_node_count()}")
 
-# res = get_predictions(root, term_val, xs)
+POP_SIZE = 1000
+N_GEN = 50
+P_CROSSOVER = 0.7
 
-# plt.plot(xs, ys, label="True", c="green")
-# plt.plot(xs, res, label="Estimated", c="black")
-# plt.legend()
-# plt.show()
 
-tree1 = Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=2))
-tree2 = Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=2))
+def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: List[float]):
+    preds = get_predictions(tree, term_val, xs)
 
-print(tree1)
-print()
-print(tree2)
-print()
+    errors = [abs(y - pred) for y, pred in zip(ys, preds)]
 
-crossover(tree1, tree2)
-print("\nAfter crossover:")
+    return sum(errors)
 
-print(tree1)
-print()
-print(tree2)
+
+population = [Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=2)) for _ in range(POP_SIZE)]
+
+optimal_fitness = [np.inf]
+for tree in population:
+    fitness = calculate_fitness(tree, term_val, xs, ys)
+    if fitness < optimal_fitness[0]:
+        optimal_fitness[0] = fitness
+    tree.update_fitness(fitness)
+
+for gen in tqdm(range(N_GEN)):
+    new_pop = []
+
+    for i in range(0, POP_SIZE, 2):
+        t1, t2 = np.random.choice(population, size=2, replace=False)
+
+        if np.random.uniform(0, 1) < 0.7:  # Crossover
+            o1 = copy.deepcopy(t1)
+            o2 = copy.deepcopy(t2)
+
+            crossover(o1, o2)
+            o1.update_fitness(calculate_fitness(o1, term_val, xs, ys))
+            o2.update_fitness(calculate_fitness(o2, term_val, xs, ys))
+
+            new_pop.extend(sorted([t1, t2, o1, o2], key=lambda x: x.fitness)[:2])
+
+        else:
+            new_pop.extend([t1, t2])
+
+    population = new_pop
+
+    for tree in population:
+        if tree.fitness < optimal_fitness[-1]:
+            optimal_fitness[-1] = tree.fitness
+
+    optimal_fitness.append(optimal_fitness[-1])
+
+plt.plot(range(N_GEN+1), optimal_fitness)
+plt.show()
