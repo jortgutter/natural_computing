@@ -19,7 +19,7 @@ class Function:
     def __repr__(self):
         newline = "\n"
         tab = "\t"
-        return f"{tab*self.depth}Function[{self.depth}]: {self.f},\n{tab*self.depth}{(newline + tab*self.depth).join([str(c) for c in self.children])}"
+        return f"{tab*self.depth}- Function[{self.depth}]: {self.f}\n{tab*self.depth}{(newline + tab*self.depth).join([str(c) for c in self.children])}"
 
 
 class Terminal:
@@ -28,6 +28,9 @@ class Terminal:
 
     def evaluate(self):
         return self.value
+
+    def __repr__(self):
+        return f"\t- Terminal: {self.value}"
 
 
 functions = [
