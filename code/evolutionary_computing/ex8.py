@@ -34,17 +34,9 @@ def plot_predictions(tree: Tree, xs: List[float], ys: List[float]):
 
 
 def crossover(tree1: Tree, tree2: Tree):
-    # Get a list of the nodes in the tree
-    refs1 = tree1.root.get_reference_list()
-    refs2 = tree2.root.get_reference_list()
-
-    # Select random node from each tree
-    node1_idx = np.random.choice(range(len(refs1)))
-    node2_idx = np.random.choice(range(len(refs2)))
-
-    # Retrieve Node objects
-    node1 = refs1[node1_idx]
-    node2 = refs2[node2_idx]
+    # Randomly select nodes from trees
+    node1 = np.random.choice(tree1.root.get_reference_list())
+    node2 = np.random.choice(tree2.root.get_reference_list())
 
     # Retrieve Node parents
     parent1 = node1.p
@@ -109,7 +101,7 @@ def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: 
 
 def select_parents(population: List[Tree], k: int) -> Tuple[Tree, Tree]:
     group1 = np.random.permutation(population)[:k]
-    group2 = np.random.permutation(population)[k:2*k]
+    group2 = np.random.permutation(population)[:k]
 
     return get_best(group1), get_best(group2)
 
@@ -163,7 +155,7 @@ for gen in tqdm(range(N_GEN)):
             new_pop.extend([t1, t2])
 
     population = new_pop
-    print(f"Replaced {replaced} organisms")
+    #print(f"Replaced {replaced} organisms")
 
     for tree in population:
         if tree.fitness < optimal_fitness[-1]:
