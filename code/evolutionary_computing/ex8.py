@@ -3,18 +3,22 @@ import numpy as np
 
 
 class Function:
-    def __init__(self, parent=None, function=lambda x: x, children=[]):
+    def __init__(self, parent=None, function=(lambda x: x, 1), children=[]):
         self.p = parent
-        self.f = function
+        self.f, self.arity = function
         self.children = children
 
-        self.depth = 0 if not self.p else p.get_depth() + 1
+        self.depth = 0 if not self.p else self.p.get_depth() + 1
+
+    def get_depth(self):
+        return self.depth
 
     def evaluate(self):
         return self.f(*[c.evaluate() for c in self.children])
 
     def __repr__(self):
         return f"Function[{self.depth}], {self.f}"
+
 
 class Terminal:
     def __init__(self, value=0):
@@ -23,7 +27,28 @@ class Terminal:
     def evaluate(self):
         return self.value
 
-test2 = Function(function = sum, children=[Terminal(10), Terminal(5)])
-test1 = Function(function = np.log, children=[test2])
 
-print(test2.evaluate())
+functions = [
+    (np.add, 2),
+    (np.subtract, 2),
+    (np.multiply, 2),
+    (np.divide, 2),
+    (np.log, 1),
+    (np.exp, 1),
+    (np.sin, 1),
+    (np.cos, 1)
+]
+
+
+def rand_func(parent, terminal=Terminal(0)):
+    f_idx = np.random.choice(range(len(functions)))
+    f = functions[f_idx]
+    return Function(parent=parent, function=f, children=[terminal]*f[1])
+
+terminal = Terminal(5)
+
+root = rand_func(None, terminal)
+
+root.children = [rand_func(root, terminal) for _ in range(root.arity)]
+
+pass
