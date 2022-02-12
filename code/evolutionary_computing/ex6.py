@@ -1,6 +1,8 @@
 import math
 import random
 import numpy as np
+import copy
+from tqdm import tqdm
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
 
@@ -45,8 +47,30 @@ def binary_tournament(pop):
     return selection[0] if selection[0].score >= selection[1].score else selection[1]
 
 
+def opt_2_swap(route, i , j):
+    # reverse middle bit:
+    return np.append(np.append(route[:i], route[i:j][::-1]), route[j:])
+
+
 def local_search(candidate):
-    pass
+    orig_route = candidate.order
+    best_route = orig_route
+    best_dist = total_dist(best_route)
+    for i in range(0, len(best_route)-1):
+        for j in range(i + 2, len(best_route)+1):
+            if j-i == 1:
+                # Slice is of size 1, swapping will not do anything
+                continue
+            new_route = copy.deepcopy(orig_route)
+            slice = orig_route[i:j]
+            new_route[i:j] = slice[::-1]
+            new_dist = total_dist(new_route)
+            if new_dist < best_dist:
+                best_route = new_route
+                best_dist = new_dist
+
+    candidate.order = best_route
+    candidate.score = evaluate(best_route)
 
 
 def crossover(parents):
@@ -89,9 +113,12 @@ def mutate(candidate, p):
             candidate.order[swap_i] = placeholder
 
 
+def total_dist(order):
+    return np.sum([distance(locations[order[i]], locations[order[i + 1]]) for i in range(len(order) - 1)])
+
+
 def evaluate(order):
-    dist = np.sum([distance(locations[order[i]], locations[order[i + 1]]) for i in range(len(order) - 1)])
-    return 1 / dist
+    return 1 / total_dist(order)
 
 
 def darwin(locations, pop_n, mutate_p, its, runs=1, use_ma=False):
@@ -103,7 +130,7 @@ def darwin(locations, pop_n, mutate_p, its, runs=1, use_ma=False):
         population = generate_population(pop_n)
         best_run_results = []
         avg_run_results = []
-        for it in range(its):
+        for it in tqdm(range(its)):
             # select n/2 parents:
             parent_pairs = []
             for i in range(int(pop_n / 2)):
@@ -116,11 +143,12 @@ def darwin(locations, pop_n, mutate_p, its, runs=1, use_ma=False):
 
             # mutate offspring:
             for child in children:
-                mutate(child, p)
+                mutate(child, mutate_p)
 
             # if MA: perform local search:
             if use_ma:
-                children = [local_search(child) for child in children]
+                for child in children:
+                    local_search(child)
 
             # evaluate offspring:
             for child in children:
@@ -144,8 +172,8 @@ def darwin(locations, pop_n, mutate_p, its, runs=1, use_ma=False):
 # parameters
 n_it = 1500
 n_runs = 10
-population = 20
-p = 3 / n
+population = 10
+p = 1 / n
 # evolution:
 best_results_EA, avg_results_EA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
 
@@ -153,6 +181,19 @@ for res in best_results_EA:
     plt.plot(res, c='red')
 for res in avg_results_EA:
     plt.plot(res, c='blue')
+
+plt.show()
+
+best_results_MA, avg_results_MA = darwin(locations[:10], pop_n=population, mutate_p=p, its=150, runs=n_runs, use_ma=True)
+
+for res in best_results_EA:
+    plt.plot(res, c='red')
+for res in avg_results_EA:
+    plt.plot(res, c='blue')
+for res in best_results_MA:
+    plt.plot(res, c='orange')
+for res in avg_results_MA:
+    plt.plot(res, c='green')
 
 plt.show()
 
