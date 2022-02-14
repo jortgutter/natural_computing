@@ -175,27 +175,25 @@ n_it = 1500
 n_runs = 10
 population = 10
 p = 1 / n
-# evolution:
-# best_results_EA, avg_results_EA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
-#
-# for res in best_results_EA:
-#     plt.plot(res, c='red')
-# for res in avg_results_EA:
-#     plt.plot(res, c='blue')
-#
-# plt.show()
 
-best_results_MA, avg_results_MA = darwin(locations[:10], pop_n=population, mutate_p=p, its=150, runs=n_runs, use_ma=True)
+# run evolution algorithms:
+best_results_EA, avg_results_EA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
+best_results_MA, avg_results_MA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=True)
 
+# plot results:
+line1 = line2 = line3 = line4 = None
 for res in best_results_EA:
-    plt.plot(res, c='red')
+    line1, = plt.plot(res, c='red')
 for res in avg_results_EA:
-    plt.plot(res, c='blue')
+    line2, = plt.plot(res, c='blue')
 for res in best_results_MA:
-    plt.plot(res, c='orange')
+    line3, = plt.plot(res, c='orange')
 for res in avg_results_MA:
-    plt.plot(res, c='green')
-
+    line4, = plt.plot(res, c='green')
+plt.legend([line1, line2, line3, line4], ['EA best','EA avg','MA best','MA avg'])
+plt.title('10 runs of best and average scores of EA and MA over 1500 iterations of TSP')
+plt.xlabel('iterations')
+plt.ylabel('score (1/distance)')
 plt.show()
 
 
