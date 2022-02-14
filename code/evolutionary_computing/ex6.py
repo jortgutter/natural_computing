@@ -176,8 +176,10 @@ population = 10
 p = 1 / n
 
 # run evolution algorithms:
-best_results_EA, avg_results_EA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
-best_results_MA, avg_results_MA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=True)
+best_results_EA, avg_results_EA = darwin(locations, pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
+np.save('EA_orig.npy', np.array([best_results_EA, avg_results_EA]))
+best_results_MA, avg_results_MA = darwin(locations, pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=True)
+np.save('MA_orig.npy', np.array([best_results_EA, avg_results_EA]))
 
 # plot results:
 line1 = line2 = line3 = line4 = None
