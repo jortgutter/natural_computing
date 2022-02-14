@@ -23,7 +23,8 @@ class Route:
 
 
 # load the data:
-locations = [[float(c) for c in x.split()] for x in open('file-tsp.txt', 'r').read().split('\n')]
+# locations = [[float(c) for c in x.split()] for x in open('file-tsp.txt', 'r').read().split('\n')]
+locations = [[float(c) for c in x.split()] for x in open('benchmark.txt', 'r').read().split('\n')]
 # save number of locations:
 n = len(locations)
 print(f'Loaded {len(locations)} locations successfully!')
@@ -175,14 +176,14 @@ n_runs = 10
 population = 10
 p = 1 / n
 # evolution:
-best_results_EA, avg_results_EA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
-
-for res in best_results_EA:
-    plt.plot(res, c='red')
-for res in avg_results_EA:
-    plt.plot(res, c='blue')
-
-plt.show()
+# best_results_EA, avg_results_EA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
+#
+# for res in best_results_EA:
+#     plt.plot(res, c='red')
+# for res in avg_results_EA:
+#     plt.plot(res, c='blue')
+#
+# plt.show()
 
 best_results_MA, avg_results_MA = darwin(locations[:10], pop_n=population, mutate_p=p, its=150, runs=n_runs, use_ma=True)
 
