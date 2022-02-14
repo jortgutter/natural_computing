@@ -23,7 +23,8 @@ class Route:
 
 
 # load the data:
-locations = [[float(c) for c in x.split()] for x in open('file-tsp.txt', 'r').read().split('\n')]
+# locations = [[float(c) for c in x.split()] for x in open('file-tsp.txt', 'r').read().split('\n')]
+locations = [[float(c) for c in x.split()] for x in open('benchmark.txt', 'r').read().split('\n')]
 # save number of locations:
 n = len(locations)
 print(f'Loaded {len(locations)} locations successfully!')
