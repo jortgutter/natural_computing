@@ -7,7 +7,7 @@ from node import *
 import copy
 
 
-def load_data(filename):
+def load_data(filename: str) -> Tuple[List[float], List[float]]:
     with open(filename, "r") as file:
         xs = [float(term) for term in file.readline().split(", ")]
         ys = [float(term) for term in file.readline().split(", ")]
@@ -63,11 +63,11 @@ def crossover(tree1: Tree, tree2: Tree):
     node2.update_parent(parent1)
 
 
-def protected_div(a, b):
+def protected_div(a: float, b: float) -> float:
     return 1 if b == 0 else np.divide(a, b)
 
 
-def protected_log(a):
+def protected_log(a: float) -> float:
     return 0 if a <= 0 else np.log(a)
 
 
@@ -91,7 +91,7 @@ P_CROSSOVER = 0.7
 k = 500
 
 
-def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: List[float]):
+def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: List[float]) -> float:
     preds = get_predictions(tree, term_val, xs)
 
     errors = [abs(y - pred) for y, pred in zip(ys, preds)]
