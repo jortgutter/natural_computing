@@ -85,10 +85,11 @@ functions = [
 xs, ys = load_data("data_ex8.txt")
 term_val = TerminalValue(0)
 
-POP_SIZE = 1000
+POP_SIZE = 150
 N_GEN = 50
 P_CROSSOVER = 0.7
-k = 500
+k = int(.3*POP_SIZE)
+MAX_DEPTH = 3
 
 
 def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: List[float]) -> float:
@@ -96,7 +97,7 @@ def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: 
 
     errors = [abs(y - pred) for y, pred in zip(ys, preds)]
 
-    return sum(errors)
+    return - sum(errors)
 
 
 def select_parents(population: List[Tree], k: int) -> Tuple[Tree, Tree]:
@@ -107,24 +108,24 @@ def select_parents(population: List[Tree], k: int) -> Tuple[Tree, Tree]:
 
 
 def get_best(group: np.ndarray) -> Tree:
-    best_fit = np.inf
+    best_fit = -np.inf
     best_tree = None
 
     for tree in group:
-        if tree.fitness < best_fit:
+        if tree.fitness > best_fit:
             best_fit = tree.fitness
             best_tree = tree
 
     return best_tree
 
 
-population = [Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=2)) for _ in range(POP_SIZE)]
+population = [Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=MAX_DEPTH)) for _ in range(POP_SIZE)]
 
-optimal_fitness = [np.inf]
+optimal_fitness = [-np.inf]
 optimal_tree = None
 for tree in population:
     fitness = calculate_fitness(tree, term_val, xs, ys)
-    if fitness < optimal_fitness[0]:
+    if fitness > optimal_fitness[0]:
         optimal_fitness[0] = fitness
         optimal_tree = tree
     tree.update_fitness(fitness)
@@ -158,7 +159,7 @@ for gen in tqdm(range(N_GEN)):
     #print(f"Replaced {replaced} organisms")
 
     for tree in population:
-        if tree.fitness < optimal_fitness[-1]:
+        if tree.fitness > optimal_fitness[-1]:
             optimal_fitness[-1] = tree.fitness
             optimal_tree = tree
 
