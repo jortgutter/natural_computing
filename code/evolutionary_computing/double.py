@@ -9,7 +9,10 @@ import matplotlib.pyplot as plt
 
 @dataclass
 class Route:
-    order: np.ndarray
+    order1: np.ndarray
+    order2: np.ndarray
+    score1: float = 0
+    score2: float = 0
     score: float = 0
 
     def __lt__(self, other):
@@ -24,7 +27,6 @@ class Route:
 
 # load the data:
 locations = [[float(c) for c in x.split()] for x in open('file-tsp.txt', 'r').read().split('\n')]
-# locations = [[float(c) for c in x.split()] for x in open('benchmark.txt', 'r').read().split('\n')]
 # save number of locations:
 n = len(locations)
 print(f'Loaded {len(locations)} locations successfully!')
@@ -36,16 +38,18 @@ def distance(a, b):
 
 
 def generate_population(p):
-    population = np.array([Route(order=np.random.permutation(n)) for i in range(p)])
+    population = np.array([Route(order1=np.random.permutation(n), order2=np.random.permutation(n)) for i in range(p)])
     for candidate in population:
-        candidate.score = evaluate(candidate.order)
+        candidate.score1 = evaluate(candidate.order1)
+        candidate.score2 = evaluate(candidate.order2)
+        candidate.score = max(candidate.score1, candidate.score2)
     return population
 
 
 # CORRECT
 def binary_tournament(pop):
     selection = np.random.choice(pop, 2)
-    return selection[0] if selection[0].score >= selection[1].score else selection[1]
+    return max(selection[0], selection[1])
 
 
 def opt_2_swap(route, i , j):
@@ -78,40 +82,62 @@ def crossover(parents):
     if len(parents) != 2:
         print('ERROR: not enough or too many parents!')
         exit(1)
-    # generate two random indices:
-    indices = np.sort(np.random.randint(n, size=2))
+    parent_genes = np.array([parents[0].order1, parents[0].order2, parents[0].order1, parents[0].order2])
+    np.random.shuffle(parent_genes)
+    # generate two sets of random indices:
+    indices1 = np.sort(np.random.randint(n, size=2))
+    indices2 = np.sort(np.random.randint(n, size=2))
     # create child arrays and create slices:
-    children = [np.zeros(n).astype(int) - 1 for i in range(2)]
-    slices = [parents[i].order[indices[0]:indices[1]] for i in range(2)]
+    children = [np.zeros(n).astype(int) - 1 for i in range(4)]
+    slices1 = [parent_genes[i][indices1[0]:indices1[1]] for i in range(2)]
+    slices2 = [parent_genes[i+2][indices2[0]:indices2[1]] for i in range(2)]
 
     # Cross over slices
     for i in range(2):
-        children[i][indices[0]:indices[1]] = slices[i]
+        children[i][indices1[0]:indices1[1]] = slices1[i]
+        children[i+2][indices2[0]:indices2[1]] = slices2[i]
 
     # Fill child arrays with values of opposite parent:
+
     for i in range(2):
         # keep track of current location within cross-parent:
-        p_i = 0
+        p_i1 = 0
+        p_i2 = 0
         # Loop over empty child values:
         for c_i in range(n):
             if children[i][c_i] == -1:
                 # look for next cross-parent value:
-                while parents[1 - i].order[p_i] in slices[i]:
-                    p_i += 1
+                while parent_genes[1 - i][p_i1] in slices1[i]:
+                    p_i1 += 1
+
                 # fill in cross-parent value:
-                children[i][c_i] = parents[1 - i].order[p_i]
-                p_i += 1
+                children[i][c_i] = parent_genes[1 - i][p_i1]
+                p_i1 += 1
+        for c_i in range(n):
+            if children[i+2][c_i] == -1:
+                # look for next cross-parent value:
+                while parent_genes[1 - i+2][p_i2] in slices2[i]:
+                    p_i2 += 1
+                # fill in cross-parent value:
+                children[i+2][c_i] = parent_genes[1 - i+2][p_i2]
+                p_i2 += 1
     # create data classes for children;
-    return np.array([Route(order=children[0]), Route(order=children[1])])
+    np.random.shuffle(children)
+    return np.array([Route(order1=children[0], order2=children[2]), Route(order1=children[1], order2=children[3])])
 
 
 def mutate(candidate, p):
     for i in range(n):
         if np.random.random() < p:
-            placeholder = candidate.order[i]
-            swap_i = np.random.randint(n)
-            candidate.order[i] = candidate.order[swap_i]
-            candidate.order[swap_i] = placeholder
+            placeholder1 = candidate.order1[i]
+            swap_i1 = np.random.randint(n)
+            candidate.order1[i] = candidate.order1[swap_i1]
+            candidate.order1[swap_i1] = placeholder1
+        if np.random.random() < p:
+            placeholder2 = candidate.order2[i]
+            swap_i2 = np.random.randint(n)
+            candidate.order2[i] = candidate.order2[swap_i2]
+            candidate.order2[swap_i2] = placeholder2
 
 
 def total_dist(order):
@@ -147,13 +173,20 @@ def darwin(locations, pop_n, mutate_p, its, runs=1, use_ma=False):
                 mutate(child, mutate_p)
 
             # if MA: perform local search:
-            if use_ma:
+            if False:
                 for child in children:
                     local_search(child)
 
             # evaluate offspring:
             for child in children:
-                child.score = evaluate(child.order)
+
+                child.score1 = evaluate(child.order1)
+                child.score2 = evaluate(child.order2)
+                if use_ma:
+                    child.score = max(child.score1, child.score2)
+                else:
+                    child.score = child.score1
+
 
             # select next generation by keeping the best pop_n individuals:
             gene_pool = np.append(population, children)
@@ -175,27 +208,27 @@ n_it = 1500
 n_runs = 10
 population = 10
 p = 1 / n
+# evolution:
+best_results_EA, avg_results_EA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
 
-# run evolution algorithms:
-best_results_EA, avg_results_EA = darwin(locations, pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=False)
-np.save('EA_orig.npy', np.array([best_results_EA, avg_results_EA]))
-best_results_MA, avg_results_MA = darwin(locations, pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=True)
-np.save('MA_orig.npy', np.array([best_results_MA, avg_results_MA]))
-
-# plot results:
-line1 = line2 = line3 = line4 = None
 for res in best_results_EA:
-    line1, = plt.plot(res, c='red')
+    plt.plot(res, c='red')
 for res in avg_results_EA:
-    line2, = plt.plot(res, c='blue')
+    plt.plot(res, c='blue')
+
+plt.show()
+
+best_results_MA, avg_results_MA = darwin(locations[:10], pop_n=population, mutate_p=p, its=n_it, runs=n_runs, use_ma=True)
+
+for res in best_results_EA:
+    plt.plot(res, c='red')
+for res in avg_results_EA:
+    plt.plot(res, c='blue')
 for res in best_results_MA:
-    line3, = plt.plot(res, c='orange')
+    plt.plot(res, c='orange')
 for res in avg_results_MA:
-    line4, = plt.plot(res, c='green')
-plt.legend([line1, line2, line3, line4], ['EA best','EA avg','MA best','MA avg'])
-plt.title('10 runs of best and average scores of EA and MA over 1500 iterations of TSP')
-plt.xlabel('iterations')
-plt.ylabel('score (1/distance)')
+    plt.plot(res, c='green')
+
 plt.show()
 
 

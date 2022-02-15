@@ -7,6 +7,8 @@ from node import *
 import copy
 
 
+
+
 def load_data(filename):
     with open(filename, "r") as file:
         xs = [float(term) for term in file.readline().split(", ")]
@@ -85,6 +87,7 @@ functions = [
 xs, ys = load_data("data_ex8.txt")
 term_val = TerminalValue(0)
 
+MAX_DEPTH = 3
 POP_SIZE = 1000
 N_GEN = 50
 P_CROSSOVER = 0.7
@@ -96,7 +99,7 @@ def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: 
 
     errors = [abs(y - pred) for y, pred in zip(ys, preds)]
 
-    return sum(errors)
+    return -sum(errors)
 
 
 def select_parents(population: List[Tree], k: int) -> Tuple[Tree, Tree]:
@@ -107,18 +110,21 @@ def select_parents(population: List[Tree], k: int) -> Tuple[Tree, Tree]:
 
 
 def get_best(group: np.ndarray) -> Tree:
-    best_fit = np.inf
+    best_fit = -np.inf
     best_tree = None
 
     for tree in group:
-        if tree.fitness < best_fit:
+        if tree.fitness > best_fit:
             best_fit = tree.fitness
             best_tree = tree
 
     return best_tree
 
 
-population = [Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=2)) for _ in range(POP_SIZE)]
+population = [Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=MAX_DEPTH)) for _ in range(POP_SIZE)]
+#for tree in population:
+#    plot_predictions(tree, xs, ys)
+
 
 optimal_fitness = [np.inf]
 optimal_tree = None
@@ -144,7 +150,7 @@ for gen in tqdm(range(N_GEN)):
             o1.update_fitness(calculate_fitness(o1, term_val, xs, ys))
             o2.update_fitness(calculate_fitness(o2, term_val, xs, ys))
 
-            new_pop.extend(sorted([t1, t2, o1, o2], key=lambda x: x.fitness)[:2])
+            new_pop.extend(sorted([t1, t2, o1, o2], key=lambda x: x.fitness)[-2:])
 
             if o1 in new_pop[-2:]:
                 replaced += 1
