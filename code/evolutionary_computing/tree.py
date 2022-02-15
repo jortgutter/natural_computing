@@ -16,5 +16,8 @@ class Tree:
     def update_fitness(self, fitness):
         self.fitness = fitness
 
+    def get_node_count(self) -> int:
+        return self.root.get_node_count()
+
     def __repr__(self):
         return self.root.__repr__()

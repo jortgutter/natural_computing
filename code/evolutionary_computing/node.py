@@ -55,7 +55,7 @@ class FunctionNode(Node):
 
         self.max_depth = max_depth
         self.children = [(FunctionNode(self, functions, terminal_value=terminal_value, max_depth=max_depth)
-                          if np.random.uniform(0, 1) < 0.5 else
+                          if np.random.uniform(0, 1) < 0.75 else
                           TerminalNode(self, value=terminal_value)
                           )if self.depth < self.max_depth-1 else
                          TerminalNode(self, value=terminal_value) for _ in range(self.arity)]
