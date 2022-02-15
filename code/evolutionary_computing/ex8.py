@@ -207,7 +207,8 @@ for gen in tqdm(range(N_GEN)):  # For each generation
     replaced = 0
     new_pop = []
 
-    for i in range(0, POP_SIZE, 2):  # Generate offspring POP_SIZE/2 times and select the best 2 from parents + offspring
+    # Generate offspring POP_SIZE/2 times and select the best 2 from parents + offspring
+    for i in range(0, POP_SIZE, 2):
         t1, t2 = select_parents(population, k)
 
         if np.random.uniform(0, 1) < 0.7:  # Crossover

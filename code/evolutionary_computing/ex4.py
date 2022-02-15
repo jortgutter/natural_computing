@@ -20,7 +20,6 @@ for n in range(N_ITER):
     # XOR with x to flip mutated genes
     x_m = np.logical_xor(x.copy(), mutate)
 
-
     if increase_only:
         # TODO: Make more efficient by removing loop
         for t in range(N_TRIALS):
