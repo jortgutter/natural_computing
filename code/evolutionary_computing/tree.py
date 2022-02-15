@@ -11,12 +11,24 @@ class Tree:
     fitness: float = -1
 
     def update_root(self, new_root):
+        """
+        Update the root node of the tree
+        :param new_root: The new root node
+        """
         self.root = new_root
 
     def update_fitness(self, fitness):
+        """
+        Set the fitness of the tree
+        :param fitness: The (pre-calculated) fitness of the tree
+        """
         self.fitness = fitness
 
     def get_node_count(self) -> int:
+        """
+        Get the number of nodes in the tree
+        :return: Number of nodes
+        """
         return self.root.get_node_count()
 
     def __repr__(self):
