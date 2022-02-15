@@ -7,9 +7,7 @@ from node import *
 import copy
 
 
-
-
-def load_data(filename):
+def load_data(filename: str) -> Tuple[List[float], List[float]]:
     with open(filename, "r") as file:
         xs = [float(term) for term in file.readline().split(", ")]
         ys = [float(term) for term in file.readline().split(", ")]
@@ -65,11 +63,11 @@ def crossover(tree1: Tree, tree2: Tree):
     node2.update_parent(parent1)
 
 
-def protected_div(a, b):
+def protected_div(a: float, b: float) -> float:
     return 1 if b == 0 else np.divide(a, b)
 
 
-def protected_log(a):
+def protected_log(a: float) -> float:
     return 0 if a <= 0 else np.log(a)
 
 
@@ -89,17 +87,19 @@ term_val = TerminalValue(0)
 
 MAX_DEPTH = 3
 POP_SIZE = 1000
+
 N_GEN = 50
 P_CROSSOVER = 0.7
-k = 500
+k = int(.3*POP_SIZE)
 
 
-def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: List[float]):
+
+def calculate_fitness(tree: Tree, term_val: TerminalValue, xs: List[float], ys: List[float]) -> float:
     preds = get_predictions(tree, term_val, xs)
 
     errors = [abs(y - pred) for y, pred in zip(ys, preds)]
 
-    return -sum(errors)
+    return - sum(errors)
 
 
 def select_parents(population: List[Tree], k: int) -> Tuple[Tree, Tree]:
@@ -122,15 +122,13 @@ def get_best(group: np.ndarray) -> Tree:
 
 
 population = [Tree(FunctionNode(None, functions=functions, terminal_value=term_val, max_depth=MAX_DEPTH)) for _ in range(POP_SIZE)]
-#for tree in population:
-#    plot_predictions(tree, xs, ys)
 
 
-optimal_fitness = [np.inf]
+optimal_fitness = [-np.inf]
 optimal_tree = None
 for tree in population:
     fitness = calculate_fitness(tree, term_val, xs, ys)
-    if fitness < optimal_fitness[0]:
+    if fitness > optimal_fitness[0]:
         optimal_fitness[0] = fitness
         optimal_tree = tree
     tree.update_fitness(fitness)
@@ -164,7 +162,7 @@ for gen in tqdm(range(N_GEN)):
     #print(f"Replaced {replaced} organisms")
 
     for tree in population:
-        if tree.fitness < optimal_fitness[-1]:
+        if tree.fitness > optimal_fitness[-1]:
             optimal_fitness[-1] = tree.fitness
             optimal_tree = tree
 
