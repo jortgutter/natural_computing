@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 
 
+# data class to store solutions
 @dataclass
 class Route:
     order: np.ndarray
@@ -23,8 +24,13 @@ class Route:
 
 
 # load the data:
+
+# tsp data from the assignment:
 locations = [[float(c) for c in x.split()] for x in open('file-tsp.txt', 'r').read().split('\n')]
+# tsp data from the benchmark:
 # locations = [[float(c) for c in x.split()] for x in open('benchmark.txt', 'r').read().split('\n')]
+
+
 # save number of locations:
 n = len(locations)
 print(f'Loaded {len(locations)} locations successfully!')
@@ -34,25 +40,28 @@ print(f'Loaded {len(locations)} locations successfully!')
 def distance(a, b):
     return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
-
+# generates initial population
 def generate_population(p):
     population = np.array([Route(order=np.random.permutation(n)) for i in range(p)])
+    # Score the generated solutions:
     for candidate in population:
         candidate.score = evaluate(candidate.order)
     return population
 
 
-# CORRECT
+# parent selection:
 def binary_tournament(pop):
     selection = np.random.choice(pop, 2)
     return selection[0] if selection[0].score >= selection[1].score else selection[1]
 
 
+# reverse section between i and j:
 def opt_2_swap(route, i , j):
     # reverse middle bit:
     return np.append(np.append(route[:i], route[i:j][::-1]), route[j:])
 
 
+# Local 2_opt search on a candidate;
 def local_search(candidate):
     orig_route = candidate.order
     best_route = orig_route
@@ -115,10 +124,12 @@ def mutate(candidate, p):
 
 
 def total_dist(order):
+    # calculates the total distance of the ordered locations
     return np.sum([distance(locations[order[i]], locations[order[i + 1]]) for i in range(len(order) - 1)])
 
 
 def evaluate(order):
+    # calculates a score from the distance
     return 1 / total_dist(order)
 
 
