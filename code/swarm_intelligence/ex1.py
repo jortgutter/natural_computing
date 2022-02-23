@@ -51,7 +51,7 @@ def main():
                                   + params["alpha"] * params["r"] * (top_cpy - xs)
             print(f"vs:\n{v_cpy}")
 
-            xs_cpy = xs_cpy + v_cpy
+            xs_cpy = np.clip(xs_cpy + v_cpy, a_min=-500, a_max=500)
             print(f"xs:\n{xs_cpy}")
 
             for idx, x in enumerate(xs_cpy):
