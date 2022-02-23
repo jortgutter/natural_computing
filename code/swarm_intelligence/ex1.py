@@ -1,5 +1,6 @@
+import matplotlib.pyplot as plt
 import numpy as np
-
+import json
 
 def f(x):
     fun = lambda x: -x * np.sin(np.sqrt(np.abs(x)))
@@ -9,19 +10,10 @@ def print_fitness(x):
     print(f"f({x[0]}, {x[1]}) = {f(x)}")
 
 
-#x = np.array([float(x) for x in input("x: ").split(", ")])
-xs = []
-s = " "
-while True:
-    s = input("x: ")
-    if not s:
-        break
-    try:
-        xs.append([float(x) for x in s.split(", ")])
-    except:
-        print("Invalid input!")
+params = json.load(open("ex1_init.json", "r"))
 
-xs = np.array(xs)
+xs = np.array(params["xs"])
+pbs = xs.copy()
 
 top = None
 top_f = -np.inf
@@ -38,14 +30,35 @@ for x in xs:
 print(f"\nGlobal optimum: {top}")
 print_fitness(top)
 
+v = np.array(params["v"])
 
-print()
-v      = np.array([float(x) for x in input("v: ").split(", ")])
-omegas = np.array([float(x) for x in input("ω: ").split(", ")])
-alpha  = float(input("α: "))
-r      = float(input("r: "))
+for omega in params["omegas"]:
+    xs_cpy = xs.copy()
+    pbs_cpy = pbs.copy()
+    top_cpy = top.copy()
+    top_f_cpy = top_f
+    v_cpy = v.copy()
 
-print()
-for omega in omegas:
-    v_new = omega * v + alpha * r * (pb - x) + alpha * r * (top - x)
-    print(f"ω = {omega}: v_new = {v_new}")
+    print(f"\n\n==== ω = {omega} ====")
+    for i in range(params["n_it"]):
+        print(f"\nIteration {i}:")
+
+        print(f"Global optimum: {top_cpy} (f = {top_f_cpy})")
+
+        v_cpy = omega * v_cpy + params["alpha"] * params["r"] * (pbs_cpy - xs_cpy) + params["alpha"] * params["r"] * (top_cpy - xs)
+        print(f"vs:\n{v_cpy}")
+
+        xs_cpy = xs_cpy + v_cpy
+        print(f"xs:\n{xs_cpy}")
+
+        for idx, x in enumerate(xs_cpy):
+            #print("Updating optima:")
+            #print(x)
+            fit = f(x)
+            #print(fit)
+            if fit > f(pbs_cpy[idx]):
+                pbs_cpy[idx] = x.copy()
+                if fit > top_f_cpy:
+                    top_cpy = x.copy()
+                    top_f_cpy = fit
+    
