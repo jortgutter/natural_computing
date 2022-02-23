@@ -1,15 +1,32 @@
 import numpy as np
 
 
-def f(x1, x2):
+def f(x):
     fun = lambda x: -x * np.sin(np.sqrt(np.abs(x)))
-    return fun(x1) + fun(x2)
+    return np.sum(fun(x))
+
+def print_fitness(x):
+    print(f"f({x[0]}, {x[1]}) = {f(x)}")
 
 
-x1 = float(input("x1: "))
-x2 = float(input("x2: "))
+x = np.array([float(x) for x in input("x: ").split(", ")])
 
+print_fitness(x)
 
-print(f"f({x1}, {x2}) = {f(x1, x2)}")
+print()
+pb = np.array([float(x) for x in input("x*: ").split(", ")])
+print_fitness(pb)
 
+print()
+top = np.array([float(x) for x in input("global optimum: ").split(", ")])
+print_fitness(top)
 
+print()
+v     = np.array([float(x) for x in input("v: ").split(", ")])
+omega = float(input("ω: "))
+alpha = float(input("α: "))
+r     = float(input("r: "))
+
+print()
+v_new = omega * v + alpha * r * (pb - x) + alpha * r * (top - x)
+print(f"v_new = {v_new}")
