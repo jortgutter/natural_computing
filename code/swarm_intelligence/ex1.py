@@ -1,14 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from typing import *
 import json
 
 
-def f(x):
+def f(x: np.darray) -> np.ndarray:
     fun = lambda x: -x * np.sin(np.sqrt(np.abs(x)))
     return np.sum(fun(x))
 
 
-def print_fitness(x):
+def print_fitness(x: np.ndarray):
     print(f"f({x[0]}, {x[1]}) = {f(x)}")
 
 
