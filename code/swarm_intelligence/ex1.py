@@ -9,24 +9,43 @@ def print_fitness(x):
     print(f"f({x[0]}, {x[1]}) = {f(x)}")
 
 
-x = np.array([float(x) for x in input("x: ").split(", ")])
+#x = np.array([float(x) for x in input("x: ").split(", ")])
+xs = []
+s = " "
+while True:
+    s = input("x: ")
+    if not s:
+        break
+    try:
+        xs.append([float(x) for x in s.split(", ")])
+    except:
+        print("Invalid input!")
 
-print_fitness(x)
+xs = np.array(xs)
 
-print()
-pb = np.array([float(x) for x in input("x*: ").split(", ")])
-print_fitness(pb)
+top = None
+top_f = -np.inf
 
-print()
-top = np.array([float(x) for x in input("global optimum: ").split(", ")])
+for x in xs:
+    fit = f(x)
+    print_fitness(x)
+
+    if top_f < fit:
+        top = x
+        top_f = fit
+
+
+print(f"\nGlobal optimum: {top}")
 print_fitness(top)
 
-print()
-v     = np.array([float(x) for x in input("v: ").split(", ")])
-omega = float(input("ω: "))
-alpha = float(input("α: "))
-r     = float(input("r: "))
 
 print()
-v_new = omega * v + alpha * r * (pb - x) + alpha * r * (top - x)
-print(f"v_new = {v_new}")
+v      = np.array([float(x) for x in input("v: ").split(", ")])
+omegas = np.array([float(x) for x in input("ω: ").split(", ")])
+alpha  = float(input("α: "))
+r      = float(input("r: "))
+
+print()
+for omega in omegas:
+    v_new = omega * v + alpha * r * (pb - x) + alpha * r * (top - x)
+    print(f"ω = {omega}: v_new = {v_new}")
