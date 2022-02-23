@@ -37,7 +37,7 @@ plt.plot(positions[1], label=f'omega={omegas[1]}, r={rs[1]}')
 plt.plot([0 for i in positions[0]], linestyle=':', label='global optimum')
 plt.xlabel('iteration')
 plt.ylabel('position')
-
+plt.title('Single particle optimization of x^2, two cases')
 plt.legend()
 
 plt.show()
