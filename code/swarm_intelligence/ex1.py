@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 
+
 def f(x):
     fun = lambda x: -x * np.sin(np.sqrt(np.abs(x)))
     return np.sum(fun(x))
