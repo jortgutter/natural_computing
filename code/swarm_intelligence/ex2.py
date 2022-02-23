@@ -32,8 +32,8 @@ for i in range(2):
         positions[i].append(x)
 
 # plotting:
-plt.plot(positions[0], label=f'omega={omegas[0]}, r={rs[0]}')
-plt.plot(positions[1], label=f'omega={omegas[1]}, r={rs[1]}')
+plt.plot(positions[0], label=f'ω={omegas[0]}, r={rs[0]}')
+plt.plot(positions[1], label=f'ω={omegas[1]}, r={rs[1]}')
 plt.plot([0 for i in positions[0]], linestyle=':', label='global optimum')
 plt.xlabel('iteration')
 plt.ylabel('position')
