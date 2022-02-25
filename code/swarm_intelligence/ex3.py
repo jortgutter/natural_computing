@@ -92,7 +92,7 @@ class ArtificialData:
         return data
 
     @staticmethod
-    def classify(self, x):
+    def classify(x):
         return 1 if x[0] >= 0.7 or x[0] <= 0.3 and x[1] >= -0.2 - x[0] else 0
 
 
