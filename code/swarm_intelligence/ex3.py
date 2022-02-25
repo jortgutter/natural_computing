@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import datasets
+from sklearn import cluster
 from tqdm import tqdm
 
 class Particle:
@@ -47,7 +48,6 @@ class PSOCluster:
                     if error < self.best_fitness:
                         self.best = particle.x.copy()
                         self.best_fitness = error
-                        print(self.best_fitness)
 
             # update particles:
             for particle in self.particles:
@@ -61,8 +61,6 @@ class PSOCluster:
     def update(self, p: Particle):
         r = np.random.random(2)
         p.v = self.omega*p.v + self.alpha1*r[0]*(p.best - p.x) + self.alpha2*r[1]*(self.best - p.x)
-        if p == self.particles[0]:
-            print(f'p0.x:{p.x}')
         p.x = p.x + p.v
 
     def score(self, x: np.ndarray, data: np.ndarray):
@@ -82,8 +80,11 @@ class PSOCluster:
 
 
 class KMeans:
-    def __init__(self, k ):
+    def __init__(self, k, data ):
         self.k = k
+
+
+
 
 
 class ArtificialData:
@@ -128,6 +129,15 @@ artificial_PSO_scores = np.array([])
 # perform clustering:
 for i in range(n_trials):
     print(f'starting trial {i}:')
+
+    # KMeans clustering on artificial data:
+    artificial_kmeans = cluster.KMeans(n_clusters=2, init='random', n_init=10, max_iter=100).fit(
+        artificial_data['X'])
+    print(artificial_kmeans.cluster_centers_)
+    iris_kmeans = cluster.KMeans(n_clusters=3, init='random', n_init=10, max_iter=100).fit(
+        iris_data['X'])
+    print(iris_kmeans.cluster_centers_)
+
     # PSO clustering on artificial data:
     print(f'PSO artificial')
     artificial_cluster = PSOCluster(k=2, n_particles=10)
@@ -149,6 +159,7 @@ for i in range(n_trials):
         alpha1=alpha1,
         alpha2=alpha2
     ))
+
 
 
 
