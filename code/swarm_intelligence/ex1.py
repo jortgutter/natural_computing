@@ -4,7 +4,7 @@ from typing import *
 import json
 
 
-def f(x: np.darray) -> np.ndarray:
+def f(x: np.ndarray) -> np.ndarray:
     fun = lambda x: -x * np.sin(np.sqrt(np.abs(x)))
     return np.sum(fun(x))
 
@@ -14,7 +14,7 @@ def print_fitness(x: np.ndarray):
 
 
 def main():
-    params = json.load(open("ex1_init.json", "r"))
+    params = json.load(open("./ex1_init.json", "r"))
 
     xs = np.array(params["xs"])
     pbs = xs.copy()
@@ -49,7 +49,7 @@ def main():
             print(f"Global optimum: {top_cpy} (f = {top_f_cpy})")
 
             v_cpy = omega * v_cpy + params["alpha"] * params["r"] * (pbs_cpy - xs_cpy)\
-                                  + params["alpha"] * params["r"] * (top_cpy - xs)
+                                  + params["alpha"] * params["r"] * (top_cpy - xs_cpy)
             print(f"vs:\n{v_cpy}")
 
             xs_cpy = np.clip(xs_cpy + v_cpy, a_min=-500, a_max=500)
