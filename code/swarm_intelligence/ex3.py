@@ -109,18 +109,18 @@ class ArtificialData:
         return 1 if x[0] >= 0.7 or x[0] <= 0.3 and x[1] >= -0.2 - x[0] else 0
 
 
-def plot_2D_data(X: np.ndarray, y: np.ndarray, y_hat:np.ndarray, k:int, data_name:str, method_name:str):
+def plot_2D_data(X: np.ndarray, y: np.ndarray, y_hat: np.ndarray, k: int, centroids:np.ndarray, data_name: str, method_name: str):
     colors = ['blue', 'red', 'orange']
     for i in range(k):
         plt.scatter(X[y == i][:, 0], X[y == i][:, 1], marker='o', s=80, c=colors[i], label=f'True class {i}')
     for i in range(k):
         plt.scatter(X[y_hat == i][:, 0], X[y_hat == i][:, 1], marker='.', c=colors[i], label=f'Predicted class {i}')
+    plt.scatter(centroids[:,0], centroids[:,1],c='black', marker='D', label='predicted centroids')
     plt.legend()
     plt.xlabel('feature 0')
     plt.ylabel('feature 1')
     plt.title(f'True vs Predicted labels of the {data_name} data\nClustered through {method_name}')
     plt.show()
-
 
 
 # Load iris data:
@@ -136,7 +136,7 @@ k_artificial = 2
 omega = 0.72
 alpha1 = alpha2 = 1.49
 n_its = 100
-n_trials = 30
+n_trials = 1
 
 all_scores = {
     'iris_PSO': [],
@@ -213,21 +213,25 @@ print(f'PSO\t\t|\t{mean_quantization_PSO_artificial:.3f}\t|\t{mean_quantization_
 # Plot KMeans iris data:
 centroids = all_centroids['iris_KMeans'][0]
 _, y_hat = get_clusters(k=k_iris, x=centroids, data=iris_data['X'])
-plot_2D_data(X = iris_data['X'], y=iris_data['y'], y_hat=y_hat, k=k_iris, data_name='Iris', method_name='KMeans')
+plot_2D_data(X=iris_data['X'], y=iris_data['y'], y_hat=y_hat, k=k_iris, centroids=centroids, data_name='Iris',
+             method_name='KMeans')
 
 # Plot KMeans artificial data:
 centroids = all_centroids['artificial_KMeans'][0]
 _, y_hat = get_clusters(k=k_artificial, x=centroids, data=artificial_data['X'])
-plot_2D_data(X = artificial_data['X'], y=artificial_data['y'], y_hat=y_hat, k=k_artificial, data_name='Artificial', method_name='KMeans')
+plot_2D_data(X=artificial_data['X'], y=artificial_data['y'], y_hat=y_hat, k=k_artificial, centroids=centroids,
+             data_name='Artificial', method_name='KMeans')
 
 # Plot PSO iris data:
 centroids = all_centroids['iris_PSO'][0]
 _, y_hat = get_clusters(k=k_iris, x=centroids, data=iris_data['X'])
-plot_2D_data(X = iris_data['X'], y=iris_data['y'], y_hat=y_hat, k=k_iris, data_name='Iris', method_name='PSO')
+plot_2D_data(X=iris_data['X'], y=iris_data['y'], y_hat=y_hat, k=k_iris, data_name='Iris', centroids=centroids,
+             method_name='PSO')
 
 # Plot KMeans artificial data:
 centroids = all_centroids['artificial_PSO'][0]
 _, y_hat = get_clusters(k=k_artificial, x=centroids, data=artificial_data['X'])
-plot_2D_data(X = artificial_data['X'], y=artificial_data['y'], y_hat=y_hat, k=k_artificial, data_name='Artificial', method_name='PSO')
+plot_2D_data(X=artificial_data['X'], y=artificial_data['y'], y_hat=y_hat, k=k_artificial, centroids=centroids,
+             data_name='Artificial', method_name='PSO')
 
 #
