@@ -1,21 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import datasets
-
+from tqdm import tqdm
 
 class Particle:
-    def __init__(self, x_init, k, dim):
+    def __init__(self, x_init: np.ndarray, dim: int):
         self.x = x_init
-        self.v = np.zeros((len(self.x), dim))
-        self.best = self.x
+        self.v = np.zeros(self.x.shape)
+        self.fitness = np.inf
+        self.best = self.x.copy()
+        self.best_fitness = np.inf
 
 
 class PSOCluster:
-    def __init__(self, k, n_particles):
+    def __init__(self, k: int, n_particles: int):
         self.k = k
         self.n_particles = n_particles
 
-    def cluster(self, data, n_iterations, omega, alpha1, alpha2):
+    def cluster(self, data: np.ndarray, n_iterations: int, omega: float, alpha1: float, alpha2: float):
         self.omega = omega
         self.alpha1 = alpha1
         self.alpha2 = alpha2
@@ -25,31 +27,58 @@ class PSOCluster:
         self.particles = []
         for i in range(self.n_particles):
             init_indices = np.random.choice(range(len(data)), self.k, replace=False)
-            self.particles.append(Particle(x_init=data[init_indices,:] ,k=self.k, dim=data_dim))
+            self.particles.append(Particle(x_init=data[init_indices,:], dim=data_dim))
 
         # take first particle position as initial global best
         self.best = self.particles[0].best
+        self.best_fitness = np.inf
 
         # iteratively update particles:
-        for i in range(n_iterations):
+        for it in tqdm(range(n_iterations)):
             for particle in self.particles:
-                # update and evaluate particle:
-                self.update(particle=particle)
+                #print(f'x: {particle.x}')
+                # calculate quantization error of particle:
+                error = self.score(particle.x, data)
+                particle.fitness = error
+                # update best and global best:
+                if error < particle.fitness:
+                    particle.best = particle.x.copy()
+                    particle.best_fitness = error
+                    if error < self.best_fitness:
+                        self.best = particle.x.copy()
+                        self.best_fitness = error
+                        print(self.best_fitness)
 
-                # update global best:
-                if self.score(particle.best, data) < self.score(self.best, data):
-                    self.best = particle.best
+            # update particles:
+            for particle in self.particles:
+                self.update(p=particle)
 
-        # return best cluster centers:
-        return self.best
+        # return best cluster centers and their fitness:
+        return np.array([self.best, self.best_fitness])
 
 
 
-    def update(self, particle):
-        pass
+    def update(self, p: Particle):
+        r = np.random.random(2)
+        p.v = self.omega*p.v + self.alpha1*r[0]*(p.best - p.x) + self.alpha2*r[1]*(self.best - p.x)
+        if p == self.particles[0]:
+            print(f'p0.x:{p.x}')
+        p.x = p.x + p.v
 
-    def score(self, x, data):
-        pass
+    def score(self, x: np.ndarray, data: np.ndarray):
+        # assign data to nearest cluster centroids:
+        clusters = [[] for i in range(self.k)]
+        for d in data:
+            # calculate distance between data point and all cluster centroids of particle:
+            distances = np.array([np.linalg.norm(d - x[i]) for i in range(self.k)])
+            # retrieve distance index of the smallest distance:
+            c_i = np.argmin(distances)
+            # append distance to cluster
+            clusters[c_i].append(distances[c_i])
+
+        # calculate quantization error:
+        error = np.sum([np.sum(clusters[i])/len(clusters[i]) if len(clusters[i]) > 0 else 0 for i in range(self.k)])/self.k
+        return error
 
 
 class KMeans:
@@ -89,16 +118,20 @@ artificial_data = ArtificialData().generate_data(n=400)
 omega = 0.72
 alpha1 = alpha2 = 1.49
 n_its = 100
-n_trials = 10
+n_trials = 30
 
-iris_PSO_results = []
-artificial_PSO_results = []
+iris_PSO_results = np.array([])
+iris_PSO_scores = np.array([])
+artificial_PSO_results = np.array([])
+artificial_PSO_scores = np.array([])
 
 # perform clustering:
 for i in range(n_trials):
+    print(f'starting trial {i}:')
     # PSO clustering on artificial data:
+    print(f'PSO artificial')
     artificial_cluster = PSOCluster(k=2, n_particles=10)
-    artificial_PSO_results.append(artificial_cluster.cluster(
+    np.append(artificial_PSO_results, artificial_cluster.cluster(
         data=artificial_data['X'],
         n_iterations=n_its,
         omega=omega,
@@ -107,14 +140,17 @@ for i in range(n_trials):
     ))
 
     # PSO clustering on iris dataset:
+    print(f'PSO iris')
     iris_cluster = PSOCluster(k=3, n_particles=10)
-    iris_PSO_results.append(iris_cluster.cluster(
+    np.append(iris_PSO_results, iris_cluster.cluster(
         data=iris_data['X'],
         n_iterations=n_its,
         omega=omega,
         alpha1=alpha1,
         alpha2=alpha2
     ))
+
+
 
 
 
