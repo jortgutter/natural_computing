@@ -207,8 +207,6 @@ print('--------+-----------+----------')
 print(f'KMeans\t|\t{mean_quantization_KMeans_artificial:.3f}\t|\t{mean_quantization_KMeans_iris:.3f}')
 print(f'PSO\t\t|\t{mean_quantization_PSO_artificial:.3f}\t|\t{mean_quantization_PSO_iris:.3f}')
 
-# plot_2D_data(iris_data['X'][:, :2], iris_data['y'])
-# plot_2D_data(artificial_data['X'][:, :2], artificial_data['y'])
 
 # Plot KMeans iris data:
 centroids = all_centroids['iris_KMeans'][0]
