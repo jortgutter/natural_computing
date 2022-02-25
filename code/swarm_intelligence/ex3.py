@@ -12,6 +12,9 @@ class Particle:
         self.best = self.x.copy()
         self.best_fitness = np.inf
 
+    def __repr__(self):
+        return f"Particle({self.x})"
+
 
 class PSOCluster:
     def __init__(self, k: int, n_particles: int):
@@ -33,26 +36,29 @@ class PSOCluster:
         self.best = self.particles[0].best
         self.best_fitness = np.inf
 
+        errors = np.zeros(n_iterations)
+
         # iteratively update particles:
         for it in tqdm(range(n_iterations)):
             for particle in self.particles:
                 error = self.score(particle.x, data)
                 particle.fitness = error
                 # update best and global best:
-                if error < particle.fitness:
+                if error < particle.best_fitness:
                     particle.best = particle.x.copy()
                     particle.best_fitness = error
                     if error < self.best_fitness:
                         self.best = particle.x.copy()
                         self.best_fitness = error
-                        print(self.best_fitness)
+
+            errors[it] = self.best_fitness
 
             # update particles:
             for particle in self.particles:
                 self.update(p=particle)
 
         # return best cluster centers and their fitness:
-        return np.array([self.best, self.best_fitness])
+        return np.array([self.best, self.best_fitness]), errors
 
     def update(self, p: Particle):
         # Update velocity
@@ -130,24 +136,27 @@ for i in range(n_trials):
     # PSO clustering on artificial data:
     print(f'PSO artificial')
     artificial_cluster = PSOCluster(k=2, n_particles=10)
-    np.append(artificial_PSO_results, artificial_cluster.cluster(
+    best, errors = artificial_cluster.cluster(
         data=artificial_data['X'],
         n_iterations=n_its,
         omega=omega,
         alpha1=alpha1,
         alpha2=alpha2
-    ))
+    )
+    np.append(artificial_PSO_results, best)
 
     # PSO clustering on iris dataset:
     print(f'PSO iris')
     iris_cluster = PSOCluster(k=3, n_particles=10)
-    np.append(iris_PSO_results, iris_cluster.cluster(
+    best, errors = iris_cluster.cluster(
         data=iris_data['X'],
         n_iterations=n_its,
         omega=omega,
         alpha1=alpha1,
         alpha2=alpha2
-    ))
+    )
+    np.append(iris_PSO_results, best)
+
 
 plot_2D_data(iris_data['X'][:, :2], iris_data['y'])
 plot_2D_data(artificial_data['X'][:, :2], artificial_data['y'])
