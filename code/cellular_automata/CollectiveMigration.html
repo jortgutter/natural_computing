@@ -104,7 +104,7 @@
 		/*	---------------------------------- */
 		let sim, meter
 		
-		let obstacles = false
+		var obstacles = false
 
 		let n_obst_per_row = 3
 		let n_obst_per_col = 3
@@ -184,8 +184,6 @@
 				spawnObstacleGrid()
 			}
 			obstacles = !obstacles
-
-			// sim.gm.seedCellAt(2, [0,0])
 		}
 
 		function spawnObstacleGrid() {
@@ -193,25 +191,23 @@
 			let width = config.field_size[0]/n_obst_per_row
 			let height = config.field_size[1]/n_obst_per_col
 			for (let i = 0; i < n_obst_per_row; i++) {
-					for (let j = 0; j < n_obst_per_col; j++) {
-						let x = Math.floor((i + 0.5) * width)
-						let y = Math.floor((j + 0.5) * height)
-						sim.gm.seedCellAt(2, [x,y])
-						var cell = Object.keys(sim.C.getStat(CPM.PixelsByCell))
-						obst_ids.push(cell)
-						console.log(cell)
-					}
+				for (let j = 0; j < n_obst_per_col; j++) {
+					let x = Math.floor((i + 0.5) * width)
+					let y = Math.floor((j + 0.5) * height)
+					obst_ids.push(sim.gm.seedCellAt(2, [x,y]))
 				}
-
+			}
+			console.log(obst_ids)
 		}
 
 		function removeObstacleGrid() {
+			console.log(obst_ids)
 			for (let cp of sim.C.cellPixels()) {
-				console.log(cp)
-				if (cp[0][0] == 2) {
+				if (cp[1] in obst_ids) {
 					sim.C.setpix(cp[0], 0)
 				}
 			}
+			obst_ids = []
 		}
 
 	</script>
