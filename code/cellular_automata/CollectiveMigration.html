@@ -20,8 +20,8 @@
 	</style>
 
 
-	<script src="./artistoo/build/artistoo.js"></script>
-	<script src="./artistoo/examples/html/fpsmeter.min.js"></script>
+	<script src="../../../assignment3/artistoo/build/artistoo.js"></script>
+	<script src="../../../assignment3/artistoo/examples/html/fpsmeter.min.js"></script>
 	<script>
 		"use strict"
 
@@ -103,6 +103,13 @@
 		}
 		/*	---------------------------------- */
 		let sim, meter
+		
+		let obstacles = false
+
+		let n_obst_per_row = 3
+		let n_obst_per_col = 3
+
+		var obst_ids = []
 
 
 		function initialize() {
@@ -118,10 +125,7 @@
 
 		function initializeGrid() {
 			if (!this.helpClasses["gm"]) { this.addGridManipulator() }
-
-
 		}
-
 
 		function step() {
 			sim.step()
@@ -151,6 +155,7 @@
 				seedCell(1)
 			}
 		}
+
 		function killCell() {
 			let t
 			let cells = Object.keys(sim.C.getStat(CPM.PixelsByCell))
@@ -172,9 +177,41 @@
 				sim.C.setpix(cp[0], 0)
 			}
 		}
-		function addObstacle() {
-			sim.gm.seedCell(2)
+		function toggleObstacles() {
+			if (obstacles) {
+				removeObstacleGrid()
+			} else {
+				spawnObstacleGrid()
+			}
+			obstacles = !obstacles
+
 			// sim.gm.seedCellAt(2, [0,0])
+		}
+
+		function spawnObstacleGrid() {
+			
+			let width = config.field_size[0]/n_obst_per_row
+			let height = config.field_size[1]/n_obst_per_col
+			for (let i = 0; i < n_obst_per_row; i++) {
+					for (let j = 0; j < n_obst_per_col; j++) {
+						let x = Math.floor((i + 0.5) * width)
+						let y = Math.floor((j + 0.5) * height)
+						sim.gm.seedCellAt(2, [x,y])
+						var cell = Object.keys(sim.C.getStat(CPM.PixelsByCell))
+						obst_ids.push(cell)
+						console.log(cell)
+					}
+				}
+
+		}
+
+		function removeObstacleGrid() {
+			for (let cp of sim.C.cellPixels()) {
+				console.log(cp)
+				if (cp[0][0] == 2) {
+					sim.C.setpix(cp[0], 0)
+				}
+			}
 		}
 
 	</script>
@@ -191,7 +228,7 @@
 	<button onclick="seedCells(100)">+100 cells</button>
 	<button onclick="killCell()">remove cell</button>
 	<button onclick="killAllCells()">remove all cells</button>
-	<button onclick="addObstacle()">add obstacle cell</button>
+	<button onclick="toggleObstacles()">toggle obstacles</button>
 	<br>
 	<div class="slidecontainer">
 		<form autocomplete="off">
