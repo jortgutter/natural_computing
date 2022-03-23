@@ -63,8 +63,8 @@
 				P: [0, 340, 50],				// Target perimeter of each cellkind
 
 				// ActivityConstraint parameters
-				LAMBDA_ACT: [0, 140, 10],		// ActivityConstraint importance per cellkind
-				MAX_ACT: [0, 20, 10],			// Activity memory duration per cellkind
+				LAMBDA_ACT: [0, 140, 0],		// ActivityConstraint importance per cellkind
+				MAX_ACT: [0, 20, 0],			// Activity memory duration per cellkind
 				ACT_MEAN: "geometric"			// Is neighborhood activity computed as a
 				// "geometric" or "arithmetic" mean?
 			},
@@ -174,9 +174,19 @@
 			let cells = Object.keys(sim.C.getStat(CPM.PixelsByCell))
 			if (cells.length == 0) return
 			for (let cp of sim.C.cellPixels()) {
-				sim.C.setpix(cp[0], 0)
+				if(!isObstacle(cp[1]))
+					sim.C.setpix(cp[0], 0)
 			}
 		}
+		function isObstacle(cell_id) {
+			for(let id of obst_ids){
+				if (cell_id == id) {
+					return true
+				}
+			}
+			return false
+		}
+
 		function toggleObstacles() {
 			if (obstacles) {
 				removeObstacleGrid()
@@ -203,9 +213,11 @@
 		function removeObstacleGrid() {
 			console.log(obst_ids)
 			for (let cp of sim.C.cellPixels()) {
-				if (cp[1] in obst_ids) {
+				// console.log(obst_ids)
+				if (isObstacle(cp[1])) {
 					sim.C.setpix(cp[0], 0)
 				}
+				
 			}
 			obst_ids = []
 		}
@@ -279,6 +291,37 @@
 					<td>Framerate</td>
 					<td>
 						<input type="text" value="1" id="frames" oninput="sim.conf['IMGFRAMERATE']=this.value">
+					</td>
+				</tr>
+				<tr>
+					<td>Obstacles per row</td>
+					<td>
+						<input type="text" value="3" id="obstrow" oninput="n_obst_per_row=this.value">
+					</td>
+					<td>Obstacles per column</td>
+					<td>
+						<input type="text" value="3" id="obstcol" oninput="n_obst_per_col=this.value">
+					</td>
+				</tr>
+				<tr>
+					<td>Obstacle Volume</td>
+					<td>
+						<input type="text" value="500" id="volume"
+							oninput="if(this.value>0){sim.C.conf.V[2]=this.value}">
+					</td>
+					<td>Obstacle &lambda;<sub>Volume</sub></td>
+					<td>
+						<input type="text" value="50" id="lvolume" oninput="sim.C.conf.LAMBDA_V[2]=this.value">
+					</td>
+				</tr>
+				<tr>
+					<td>Obstacle Perimeter</td>
+					<td>
+						<input type="text" value="340" id="perimeter" oninput="sim.C.conf.P[2]=this.value">
+					</td>
+					<td>Obstacle &lambda;<sub>P</sub></td>
+					<td>
+						<input type="text" value="50" id="lperim" oninput="sim.C.conf.LAMBDA_P[2]=this.value">
 					</td>
 				</tr>
 
