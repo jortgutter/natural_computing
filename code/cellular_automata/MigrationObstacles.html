@@ -60,7 +60,7 @@
 
 				// PerimeterConstraint parameters
 				LAMBDA_P: [0, 2, 20],			// PerimeterConstraint importance per cellkind
-				P: [0, 340, 90],				// Target perimeter of each cellkind
+				P: [0, 340, 50],				// Target perimeter of each cellkind
 
 				// ActivityConstraint parameters
 				LAMBDA_ACT: [0, 140, 0],		// ActivityConstraint importance per cellkind
@@ -318,7 +318,7 @@
 				<tr>
 					<td>Obstacle Perimeter</td>
 					<td>
-						<input type="text" value="90" id="perimeter" oninput="sim.C.conf.P[2]=this.value">
+						<input type="text" value="50" id="perimeter" oninput="sim.C.conf.P[2]=this.value">
 					</td>
 					<td>Obstacle &lambda;<sub>P</sub></td>
 					<td>
