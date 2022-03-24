@@ -64,7 +64,7 @@
 
 				// ActivityConstraint parameters
 				LAMBDA_ACT: [0, 140, 0],		// ActivityConstraint importance per cellkind
-				MAX_ACT: [0, 20, 0],			// Activity memory duration per cellkind
+				MAX_ACT: [0, 80, 0],			// Activity memory duration per cellkind
 				ACT_MEAN: "geometric"			// Is neighborhood activity computed as a
 				// "geometric" or "arithmetic" mean?
 			},
@@ -103,13 +103,14 @@
 		}
 		/*	---------------------------------- */
 		let sim, meter
-		
+
+		// Obstacle parameters
 		var obstacles = false
 
 		let n_obst_per_row = 5
 		let n_obst_per_col = 5
 
-		var obst_ids = []
+		var obst_ids = []  // Keeps track of the cell IDs of the obstacle, for easy removal
 
 
 		function initialize() {
@@ -276,7 +277,7 @@
 				<tr>
 					<td>Max<sub>Act</sub></td>
 					<td>
-						<input type="text" value="20" id="mact" oninput="sim.C.conf.MAX_ACT[1]=this.value">
+						<input type="text" value="80" id="mact" oninput="sim.C.conf.MAX_ACT[1]=this.value">
 					</td>
 					<td>&lambda;<sub>Act</sub></td>
 					<td>
