@@ -55,12 +55,12 @@
 					[20,20, 0]],	// Obstacle
 
 				// VolumeConstraint parameters
-				LAMBDA_V: [0, 50, 100],				// VolumeConstraint importance per cellkind
-				V: [0, 500, 300],					// Target volume of each cellkind
+				LAMBDA_V: [0, 50, 50],				// VolumeConstraint importance per cellkind
+				V: [0, 500, 200],					// Target volume of each cellkind
 
 				// PerimeterConstraint parameters
-				LAMBDA_P: [0, 2, 500],			// PerimeterConstraint importance per cellkind
-				P: [0, 340, 50],				// Target perimeter of each cellkind
+				LAMBDA_P: [0, 2, 20],			// PerimeterConstraint importance per cellkind
+				P: [0, 340, 90],				// Target perimeter of each cellkind
 
 				// ActivityConstraint parameters
 				LAMBDA_ACT: [0, 140, 0],		// ActivityConstraint importance per cellkind
@@ -106,8 +106,8 @@
 		
 		var obstacles = false
 
-		let n_obst_per_row = 3
-		let n_obst_per_col = 3
+		let n_obst_per_row = 5
+		let n_obst_per_col = 5
 
 		var obst_ids = []
 
@@ -255,7 +255,7 @@
 				<tr>
 					<td>Volume</td>
 					<td>
-						<input type="text" value="500" id="volume"
+						<input type="text" value="200" id="volume"
 							oninput="if(this.value>0){sim.C.conf.V[1]=this.value}">
 					</td>
 					<td>&lambda;<sub>Volume</sub></td>
@@ -266,7 +266,7 @@
 				<tr>
 					<td>Perimeter</td>
 					<td>
-						<input type="text" value="340" id="perimeter" oninput="sim.C.conf.P[1]=this.value">
+						<input type="text" value="180" id="perimeter" oninput="sim.C.conf.P[1]=this.value">
 					</td>
 					<td>&lambda;<sub>P</sub></td>
 					<td>
@@ -280,7 +280,7 @@
 					</td>
 					<td>&lambda;<sub>Act</sub></td>
 					<td>
-						<input type="text" value="140" id="lact" oninput="sim.C.conf.LAMBDA_ACT[1]=this.value">
+						<input type="text" value="200" id="lact" oninput="sim.C.conf.LAMBDA_ACT[1]=this.value">
 					</td>
 				</tr>
 				<tr>
@@ -290,23 +290,23 @@
 					</td>
 					<td>Framerate</td>
 					<td>
-						<input type="text" value="1" id="frames" oninput="sim.conf['IMGFRAMERATE']=this.value">
+						<input type="text" value="5" id="frames" oninput="sim.conf['IMGFRAMERATE']=this.value">
 					</td>
 				</tr>
 				<tr>
 					<td>Obstacles per row</td>
 					<td>
-						<input type="text" value="3" id="obstrow" oninput="n_obst_per_row=this.value">
+						<input type="text" value="5" id="obstrow" oninput="n_obst_per_row=this.value">
 					</td>
 					<td>Obstacles per column</td>
 					<td>
-						<input type="text" value="3" id="obstcol" oninput="n_obst_per_col=this.value">
+						<input type="text" value="5" id="obstcol" oninput="n_obst_per_col=this.value">
 					</td>
 				</tr>
 				<tr>
 					<td>Obstacle Volume</td>
 					<td>
-						<input type="text" value="500" id="volume"
+						<input type="text" value="200" id="volume"
 							oninput="if(this.value>0){sim.C.conf.V[2]=this.value}">
 					</td>
 					<td>Obstacle &lambda;<sub>Volume</sub></td>
@@ -317,13 +317,14 @@
 				<tr>
 					<td>Obstacle Perimeter</td>
 					<td>
-						<input type="text" value="340" id="perimeter" oninput="sim.C.conf.P[2]=this.value">
+						<input type="text" value="90" id="perimeter" oninput="sim.C.conf.P[2]=this.value">
 					</td>
 					<td>Obstacle &lambda;<sub>P</sub></td>
 					<td>
-						<input type="text" value="50" id="lperim" oninput="sim.C.conf.LAMBDA_P[2]=this.value">
+						<input type="text" value="20" id="lperim" oninput="sim.C.conf.LAMBDA_P[2]=this.value">
 					</td>
 				</tr>
+
 
 			</table>
 		</form>
