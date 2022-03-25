@@ -113,6 +113,12 @@
 		var obst_ids = []  // Keeps track of the cell IDs of the obstacle, for easy removal
 
 
+		// variables to run simulation for a set interval
+		var intervalLength = 1000
+		var interval = 0
+		var intervalMode = false
+
+
 		function initialize() {
 			let custommethods = {
 				initializeGrid: initializeGrid
@@ -122,6 +128,7 @@
 
 			meter = new FPSMeter({ left: "auto", right: "5px" })
 			step()
+			sim.running = true
 		}
 
 		function initializeGrid() {
@@ -132,6 +139,16 @@
 			sim.step()
 			meter.tick()
 			if (sim.conf["RUNTIME_BROWSER"] == "Inf" | sim.time + 1 < sim.conf["RUNTIME_BROWSER"]) {
+				// interval handling
+				if (intervalMode) {
+					if (interval >= intervalLength) {
+						sim.running = false
+						intervalMode = false
+					} else {
+						interval++
+					}
+				} 
+				// create new frame
 				requestAnimationFrame(step)
 			}
 		}
@@ -147,6 +164,15 @@
 		}
 		function stopsim() {
 			sim.running = false
+			intervalMode = false
+		}
+		// This function starts an interval, of specified length
+		function runInterval() {
+			if (!sim.running) {
+				interval = 0
+				intervalMode = true
+				sim.running = true
+			}
 		}
 		function seedCell(k) {
 			sim.gm.seedCell(k)
@@ -232,6 +258,7 @@
 	<br>
 	<button onclick="startsim()">start</button>
 	<button onclick="stopsim()">stop</button>
+	<button onclick="runInterval()">run interval</button>
 	<button onclick="seedCells(1)">seed cell</button>
 	<button onclick="seedCells(10)">+10 cells</button>
 	<button onclick="seedCells(100)">+100 cells</button>
@@ -323,6 +350,12 @@
 					<td>Obstacle &lambda;<sub>P</sub></td>
 					<td>
 						<input type="text" value="20" id="lperim" oninput="sim.C.conf.LAMBDA_P[2]=this.value">
+					</td>
+				</tr>
+				<tr>
+					<td>Interval length</td>
+					<td>
+						<input type="text" value="1000" id="interval" oninput="intervalLength=this.value">
 					</td>
 				</tr>
 
