@@ -6,11 +6,13 @@ import subprocess
 import os.path
 
 
-def calc_score(train_file: str, test_file: str, n: int, r: int, path: str = "./") -> List[float]:
+def calc_score(train_file: str, test_file: str, r: int, path: str = "./") -> List[float]:
     jar_path = os.path.join(path, "negsel2.jar")
     train_path = os.path.join(path, train_file)
     test_path = os.path.join(path, test_file)
 
+    with open(os.path.join(path, train_file), "r") as file:
+        n = len(file.readline().strip())
     command = f"java -jar {jar_path} -self {train_path} -n {n} -r {r} -c -l < {test_path}"
     result = subprocess.getoutput(command)
     outputs = [float(i) for i in result.split("\n")]
@@ -18,8 +20,8 @@ def calc_score(train_file: str, test_file: str, n: int, r: int, path: str = "./"
     return outputs
 
 
-def roc_auc(train_file: str, base_test_file: str, comp_test_file: str, n: int, r: int, path: str = "/.", plot_roc: bool = False) -> float:
-    getscore = lambda x: calc_score(train_file, x, n, r, path=path)
+def roc_auc(train_file: str, base_test_file: str, comp_test_file: str, r: int, path: str = "/.", plot_roc: bool = False) -> float:
+    getscore = lambda x: calc_score(train_file, x, r, path=path)
     base_score = getscore(base_test_file)
     comp_score = getscore(comp_test_file)
 
@@ -29,6 +31,8 @@ def roc_auc(train_file: str, base_test_file: str, comp_test_file: str, n: int, r
     labels[len(base_score):] = 1
 
     if plot_roc:
+        with open(os.path.join(path, base_test_file), "r") as file:
+            n = len(file.readline().strip())
         fpr, tpr, thresholds = roc_curve(labels, appended)
         plt.plot(fpr, tpr, 'crimson')
         plt.title(f"ROC-Curve of {base_test_file} versus {comp_test_file}\nn = {n}, r = {r}")
