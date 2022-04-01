@@ -1,3 +1,5 @@
+import sys
+
 from sklearn.metrics import roc_auc_score, roc_curve
 from typing import List
 import matplotlib.pyplot as plt
@@ -16,13 +18,20 @@ def calc_score(train_file: str, test_file: str, r: int, path: str = "./") -> Lis
     :param path: Directory in which the train and test file are stored
     :return: Anomaly scores per line
     """
+    with open(os.path.join(path, train_file), "r") as file:
+        n1 = len(file.readline().strip())
+    with open(os.path.join(path, test_file), "r") as file:
+        n2 = len(file.readline().strip())
+
+    if n1 != n1 or (n1 < r or n2 < r):
+        print("Line lengths do not match or are < r!", file=sys.stderr)
+        exit(1)
+
     jar_path = os.path.join(path, "negsel2.jar")
     train_path = os.path.join(path, train_file)
     test_path = os.path.join(path, test_file)
 
-    with open(os.path.join(path, train_file), "r") as file:
-        n = len(file.readline().strip())
-    command = f"java -jar {jar_path} -self {train_path} -n {n} -r {r} -c -l < {test_path}"
+    command = f"java -jar {jar_path} -self {train_path} -n {n1} -r {r} -c -l < {test_path}"
     result = subprocess.getoutput(command)
     outputs = [float(i) for i in result.split("\n")]
 
