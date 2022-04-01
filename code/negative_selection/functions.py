@@ -7,7 +7,48 @@ import os.path
 import sys
 
 
-def sys_scores(train_false: str, test_files: List[str], r: int, alphabet: str, path: str = "./") -> Tuple[np.ndarray, np.ndarray]:
+def sys_roc_auc(train_false: str, test_files: Tuple[str, str], r: int, alphabet: str, path: str = "/.", plot_roc: bool = False) -> float:
+    """
+    This function calculates the area under the ROC Curve for a test file set (negative and positive samples) after
+    training on the train file (negative samples only).
+
+    :param train_false: The pre-processed training data filename (negative samples)
+    :param test_files: A tuple containing the negative and positive sample file names
+    :param r: Minimum match sequence length
+    :param alphabet: File containing all the characters from the used alphabet
+    :param path: Directory in which the train and test files are stored
+    :param plot_roc: Default: False. If True, plot the ROC Curve
+    :return: Area under the ROC Curve
+    """
+    scores, labels = sys_scores(train_false, test_files, r=r, alphabet=alphabet, path=path)
+
+    if plot_roc:
+        with open(os.path.join(path, test_files[0]), "r") as file:
+            n = len(file.readline().strip())
+        fpr, tpr, thresholds = roc_curve(labels, scores)
+        plt.plot(fpr, tpr, 'crimson')
+        plt.title(f"ROC-Curve of {test_files[0]} versus {test_files[1]}\nn = {n}, r = {r}")
+        plt.xlabel("False positive rate")
+        plt.ylabel("True positive rate")
+        plt.show()
+
+    auc = roc_auc_score(labels, scores)
+
+    return auc
+
+
+def sys_scores(train_false: str, test_files: Tuple[str, str], r: int, alphabet: str, path: str = "./") -> Tuple[np.ndarray, np.ndarray]:
+    """
+    This function calculates the anomaly scores per line for a given set of test files (negative and positive samples)
+    after training on the train file (negative samples only).
+
+    :param train_false: The pre-processed training data filename (negative samples)
+    :param test_files: A tuple containing the negative and positive sample file names
+    :param r: Minimum match sequence length
+    :param alphabet: File containing all the characters from the used alphabet
+    :param path: Directory in which the train and test files are stored
+    :return: Tuple of anomaly scores and the class labels
+    """
     out_false = calc_score(train_false, test_files[0], r=r, alphabet=alphabet, path=path)
     out_true = calc_score(train_false, test_files[1], r=r, alphabet=alphabet, path=path)
 
