@@ -1,7 +1,7 @@
 from functions import *
 import os
 
-TARGET_DIR = "../../../assignment4/negative-selection"
+TARGET_DIR = "./"
 
 ENG_TRAIN = "english.train"
 ENG_TEST = "english.test"
