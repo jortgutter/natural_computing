@@ -22,11 +22,11 @@ def main():
 
     # create output file paths:
     parsed_data_file = args.data_file.split('.')
-    parsed_data_file = '-'.join(parsed_data_file[:-1]) + '_parsed_' + str(n) + '.' + parsed_data_file[-1]
+    parsed_data_file = '_'.join(parsed_data_file[:-1]) + '_parsed_' + str(n) + '.' + parsed_data_file[-1]
     parsed_data_path = os.path.join(args.destination_path if args.destination_path else args.path, parsed_data_file)
 
     parsed_label_file = args.label_file.split('.')
-    parsed_label_file = '-'.join(parsed_label_file[:-1]) + '_parsed_' + str(n) + '.' + parsed_label_file[-1]
+    parsed_label_file = '_'.join(parsed_label_file[:-1]) + '_parsed_' + str(n) + '.' + parsed_label_file[-1]
     parsed_label_path = os.path.join(args.destination_path if args.destination_path else args.path, parsed_label_file)
 
     print(parsed_data_path)
