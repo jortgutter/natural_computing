@@ -7,6 +7,15 @@ import os.path
 
 
 def calc_score(train_file: str, test_file: str, r: int, path: str = "./") -> List[float]:
+    """
+    This function calculates the anomaly scores per line for a given test file after training on the train file.
+
+    :param train_file: The pre-processed training data filename
+    :param test_file: The pre-processed test data filename
+    :param r: Minimum match sequence length
+    :param path: Directory in which the train and test file are stored
+    :return: Anomaly scores per line
+    """
     jar_path = os.path.join(path, "negsel2.jar")
     train_path = os.path.join(path, train_file)
     test_path = os.path.join(path, test_file)
@@ -21,6 +30,18 @@ def calc_score(train_file: str, test_file: str, r: int, path: str = "./") -> Lis
 
 
 def roc_auc(train_file: str, base_test_file: str, comp_test_file: str, r: int, path: str = "/.", plot_roc: bool = False) -> float:
+    """
+    This function calculates the area under the ROC Curve for a true class (base file) and false class (comp file) after
+    training on the train file.
+
+    :param train_file: The pre-processed training data filename
+    :param base_test_file: The pre-processed test data filename of the true class
+    :param comp_test_file: The pre-processed test data filename of the false class
+    :param r: Minimum match sequence length
+    :param path: Directory in which the train and test files are stored
+    :param plot_roc: Default: False. If True, plot the ROC Curve
+    :return: Area under the ROC Curve
+    """
     getscore = lambda x: calc_score(train_file, x, r, path=path)
     base_score = getscore(base_test_file)
     comp_score = getscore(comp_test_file)
