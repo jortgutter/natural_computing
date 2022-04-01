@@ -7,27 +7,29 @@ import os.path
 import sys
 
 
-def sys_roc_auc(train_false: str, test_files: Tuple[str, str], r: int, alphabet: str, path: str = "/.", plot_roc: bool = False) -> float:
+def sys_roc_auc(train: str, test: str, labels: np.ndarray, r: int, jar_path: str, alphabet: str, path: str = "/.", plot_roc: bool = False) -> float:
     """
     This function calculates the area under the ROC Curve for a test file set (negative and positive samples) after
     training on the train file (negative samples only).
 
-    :param train_false: The pre-processed training data filename (negative samples)
-    :param test_files: A tuple containing the negative and positive sample file names
+    :param train: The pre-processed training data filename (negative samples)
+    :param test: The pre-processed test data filename containing negative and positive samples
+    :param labels: The labels corresponding to the test data
     :param r: Minimum match sequence length
+    :param jar_path: Path to negsel2.jar file
     :param alphabet: File containing all the characters from the used alphabet
     :param path: Directory in which the train and test files are stored
     :param plot_roc: Default: False. If True, plot the ROC Curve
     :return: Area under the ROC Curve
     """
-    scores, labels = sys_scores(train_false, test_files, r=r, alphabet=alphabet, path=path)
+    scores = sys_scores(train, test, r=r, jar_path=jar_path, alphabet=alphabet, path=path)
 
     if plot_roc:
-        with open(os.path.join(path, test_files[0]), "r") as file:
+        with open(os.path.join(path, test[0]), "r") as file:
             n = len(file.readline().strip())
         fpr, tpr, thresholds = roc_curve(labels, scores)
         plt.plot(fpr, tpr, 'crimson')
-        plt.title(f"ROC-Curve of {test_files[0]} versus {test_files[1]}\nn = {n}, r = {r}")
+        plt.title(f"ROC-Curve of {test[0]} versus {test[1]}\nn = {n}, r = {r}")
         plt.xlabel("False positive rate")
         plt.ylabel("True positive rate")
         plt.show()
@@ -37,48 +39,40 @@ def sys_roc_auc(train_false: str, test_files: Tuple[str, str], r: int, alphabet:
     return auc
 
 
-def sys_scores(train_false: str, test_files: Tuple[str, str], r: int, alphabet: str, path: str = "./") -> Tuple[np.ndarray, np.ndarray]:
+def sys_scores(train: str, test: str, r: int, jar_path: str, alphabet: str, path: str = "./") -> np.ndarray:
     """
-    This function calculates the anomaly scores per line for a given set of test files (negative and positive samples)
+    This function calculates the anomaly scores per line for a given test file (negative and positive samples)
     after training on the train file (negative samples only).
 
-    :param train_false: The pre-processed training data filename (negative samples)
-    :param test_files: A tuple containing the negative and positive sample file names
+    :param train: The pre-processed training data filename (negative samples)
+    :param test: The pre-processed test data filename containing negative and positive samples
     :param r: Minimum match sequence length
+    :param jar_path: Path to negsel2.jar file
     :param alphabet: File containing all the characters from the used alphabet
     :param path: Directory in which the train and test files are stored
     :return: Tuple of anomaly scores and the class labels
     """
-    out_false = calc_score(train_false, test_files[0], r=r, alphabet=alphabet, path=path)
-    out_true = calc_score(train_false, test_files[1], r=r, alphabet=alphabet, path=path)
+    out = calc_score(train, test, r=r, jar_path=jar_path, alphabet=alphabet, path=path)
 
-    appended = np.append(out_false, out_true)
-    labels = np.zeros(appended.shape)
-    labels[len(out_false):] = 1
-
-    nans = np.where(np.isnan(appended))[0]
+    nans = np.where(np.isnan(out))[0]
     scores = np.zeros(len(nans))
-    classes = np.zeros(len(nans))
 
     lower = -1
     for i, upper in enumerate(nans):
-        scores[i] = np.mean(appended[lower + 1:upper])
-        classes[i] = labels[lower + 1]
+        scores[i] = np.mean(out[lower + 1:upper])
         lower = upper
 
-    del appended
-    del labels
-
-    return scores, classes
+    return scores
 
 
-def calc_score(train_file: str, test_file: str, r: int, alphabet: str = None, path: str = "./") -> List[float]:
+def calc_score(train_file: str, test_file: str, r: int, jar_path:str, alphabet: str = None, path: str = "./") -> List[float]:
     """
     This function calculates the anomaly scores per line for a given test file after training on the train file.
 
     :param train_file: The pre-processed training data filename
     :param test_file: The pre-processed test data filename
     :param r: Minimum match sequence length
+    :param jar_path: Path to negsel2.jar file
     :param alphabet: File containing all the characters from the used alphabet
     :param path: Directory in which the train and test file are stored
     :return: Anomaly scores per line
@@ -92,11 +86,10 @@ def calc_score(train_file: str, test_file: str, r: int, alphabet: str = None, pa
         print("Line lengths do not match or are < r!", file=sys.stderr)
         exit(1)
 
-    jar_path = os.path.join(path, "negsel2.jar")
     train_path = os.path.join(path, train_file)
     test_path = os.path.join(path, test_file)
 
-    alphabet_string = f"-alphabet file://{alphabet}" if alphabet else ""
+    alphabet_string = f"-alphabet file://{os.path.join(path, alphabet)}" if alphabet else ""
 
     command = f"java -jar {jar_path} -self {train_path} -n {n1} -r {r} -c -l {alphabet_string} < {test_path}"
     result = subprocess.getoutput(command)
