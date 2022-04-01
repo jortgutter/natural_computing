@@ -7,11 +7,12 @@ def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description='Preprocess system call files to a fixed word length per line')
 
-    parser.add_argument('path', help='Path to folder containing the input files')
+    parser.add_argument('path', help='Path to folder containing the input file')
     parser.add_argument('data_file', type=str, help='Datafile to be parsed')
     parser.add_argument('string_length', metavar='n', type=int, help='Target word length')
+    parser.add_argument('-padding', dest='padding', default='a', help="Symbol used for padding. Default: 'a'")
     parser.add_argument('-dest', dest='destination_path', default=False,
-                        help='Optional path of the output files. If not set, output files will be saved in the input '
+                        help='Optional path of the output file. If not set, output files will be saved in the input '
                              'folder')
     parser.add_argument('--no-overlap', dest='no_overlap', action='store_const', const=True, default=False,
                         help = "Parser will use sliding windows unless this flag is set")
@@ -19,46 +20,36 @@ def main():
 
     n = args.string_length
     data_filename_decomposed = args.data_file.split('.')
-    is_test_file = data_filename_decomposed[-1] == 'test'
     no_overlap = args.no_overlap
+    padding = args.padding
 
-
-    # open input files
+    # read data
     data = [line.strip() for line in open(os.path.join(args.path, args.data_file)).readlines()]
-    if is_test_file:
-        labels = [int(line.strip()) for line in open(os.path.join(args.path, '.'.join(data_filename_decomposed[:-1]) + '.labels')).readlines()]
-    else:
-        labels = [1 for i in range(len(data))]
-
 
     # create output file paths
-    parsed_true_file = '_'.join(data_filename_decomposed[:-1]) + '_n' + str(n) + '_true.' + data_filename_decomposed[-1]
-    parsed_true_path = os.path.join(args.destination_path if args.destination_path else args.path, parsed_true_file)
-
-    parsed_false_file = '_'.join(data_filename_decomposed[:-1]) + '_n' + str(n) + '_false.' + data_filename_decomposed[-1]
-    parsed_false_path = os.path.join(args.destination_path if args.destination_path else args.path, parsed_false_file)
+    parsed_file = '_'.join(data_filename_decomposed[:-1]) + '_parsed_n' + str(n) + '.' + data_filename_decomposed[-1]
+    parsed_path = os.path.join(args.destination_path if args.destination_path else args.path, parsed_file)
 
     # open output files
-    files = [open(parsed_false_path, 'w'), open(parsed_true_path, 'w')]
+    file = open(parsed_path, 'w')
 
-    # cut
-    for i, (line, label) in enumerate(zip(data, labels)):
+    # parse all lines to fixed length words, with an extra newline between the original lines
+    for line in data:
         if no_overlap:
+            # non-overlapping chunks
             for j in range(math.ceil(len(line)/n)):
                 chunk = line[j*n:j*n+n]
                 if len(chunk) < n:
-                    chunk += '_'*(n - len(chunk))
-                files[label].write(chunk + '\n')
-
+                    chunk += padding*(n - len(chunk))
+                file.write(chunk + '\n')
         else:
-            line+='_'*(max(0, n-len(line)))
+            # sliding window
+            line+=padding*(max(0, n-len(line)))
             for j in range(len(line)-(n-1)):
-                files[label].write(line[j:j+n] + '\n')
-
-        files[label].write('\n')
-
-    for file in files:
-        file.close()
+                file.write(line[j:j+n] + '\n')
+        # newline to signal the end of the original line
+        file.write('\n')
+    file.close()
 
 
 if __name__ == "__main__":
