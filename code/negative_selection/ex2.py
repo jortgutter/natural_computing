@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
-
 from functions import *
+
+# TODO: Use separate path for negsel2.jar to avoid annoying filenames for ALPHABET, TRAIN, and TEST
+# TODO: Something cool with wrappers?
 
 TARGET_DIR = "./"
 ALPHABET = "syscalls/snd-cert/snd-cert.alpha"
