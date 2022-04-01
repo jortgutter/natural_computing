@@ -2,6 +2,8 @@ import os
 import math
 import argparse
 
+PADDING = 'a'
+
 
 def main():
     # Parse arguments
@@ -14,7 +16,7 @@ def main():
                         help='Optional path of the output files. If not set, output files will be saved in the input '
                              'folder')
     parser.add_argument('--no-overlap', dest='no_overlap', action='store_const', const=True, default=False,
-                        help = "Parser will use sliding windows unless this flag is set")
+                        help="Parser will use sliding windows unless this flag is set")
     args = parser.parse_args()
 
     n = args.string_length
@@ -22,20 +24,20 @@ def main():
     is_test_file = data_filename_decomposed[-1] == 'test'
     no_overlap = args.no_overlap
 
-
     # open input files
     data = [line.strip() for line in open(os.path.join(args.path, args.data_file)).readlines()]
     if is_test_file:
-        labels = [int(line.strip()) for line in open(os.path.join(args.path, '.'.join(data_filename_decomposed[:-1]) + '.labels')).readlines()]
+        labels = [int(line.strip()) for line in
+                  open(os.path.join(args.path, '.'.join(data_filename_decomposed[:-1]) + '.labels')).readlines()]
     else:
-        labels = [1 for i in range(len(data))]
-
+        labels = [0 for i in range(len(data))]
 
     # create output file paths
     parsed_true_file = '_'.join(data_filename_decomposed[:-1]) + '_n' + str(n) + '_true.' + data_filename_decomposed[-1]
     parsed_true_path = os.path.join(args.destination_path if args.destination_path else args.path, parsed_true_file)
 
-    parsed_false_file = '_'.join(data_filename_decomposed[:-1]) + '_n' + str(n) + '_false.' + data_filename_decomposed[-1]
+    parsed_false_file = '_'.join(data_filename_decomposed[:-1]) + '_n' + str(n) + '_false.' + data_filename_decomposed[
+        -1]
     parsed_false_path = os.path.join(args.destination_path if args.destination_path else args.path, parsed_false_file)
 
     # open output files
@@ -44,16 +46,16 @@ def main():
     # cut
     for i, (line, label) in enumerate(zip(data, labels)):
         if no_overlap:
-            for j in range(math.ceil(len(line)/n)):
-                chunk = line[j*n:j*n+n]
+            for j in range(math.ceil(len(line) / n)):
+                chunk = line[j * n:j * n + n]
                 if len(chunk) < n:
-                    chunk += '_'*(n - len(chunk))
+                    chunk += PADDING * (n - len(chunk))
                 files[label].write(chunk + '\n')
 
         else:
-            line+='_'*(max(0, n-len(line)))
-            for j in range(len(line)-(n-1)):
-                files[label].write(line[j:j+n] + '\n')
+            line += PADDING * (max(0, n - len(line)))
+            for j in range(len(line) - (n - 1)):
+                files[label].write(line[j:j + n] + '\n')
 
         files[label].write('\n')
 

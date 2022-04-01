@@ -1,20 +1,44 @@
-import sys
-
 from sklearn.metrics import roc_auc_score, roc_curve
-from typing import List
+from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
 import os.path
+import sys
 
 
-def calc_score(train_file: str, test_file: str, r: int, path: str = "./") -> List[float]:
+def sys_scores(train_false: str, test_files: List[str], r: int, alphabet: str, path: str = "./") -> Tuple[np.ndarray, np.ndarray]:
+    out_false = calc_score(train_false, test_files[0], r=r, alphabet=alphabet, path=path)
+    out_true = calc_score(train_false, test_files[1], r=r, alphabet=alphabet, path=path)
+
+    appended = np.append(out_false, out_true)
+    labels = np.zeros(appended.shape)
+    labels[len(out_false):] = 1
+
+    nans = np.where(np.isnan(appended))[0]
+    scores = np.zeros(len(nans))
+    classes = np.zeros(len(nans))
+
+    lower = -1
+    for i, upper in enumerate(nans):
+        scores[i] = np.mean(appended[lower + 1:upper])
+        classes[i] = labels[lower + 1]
+        lower = upper
+
+    del appended
+    del labels
+
+    return scores, classes
+
+
+def calc_score(train_file: str, test_file: str, r: int, alphabet: str = None, path: str = "./") -> List[float]:
     """
     This function calculates the anomaly scores per line for a given test file after training on the train file.
 
     :param train_file: The pre-processed training data filename
     :param test_file: The pre-processed test data filename
     :param r: Minimum match sequence length
+    :param alphabet: File containing all the characters from the used alphabet
     :param path: Directory in which the train and test file are stored
     :return: Anomaly scores per line
     """
@@ -31,7 +55,9 @@ def calc_score(train_file: str, test_file: str, r: int, path: str = "./") -> Lis
     train_path = os.path.join(path, train_file)
     test_path = os.path.join(path, test_file)
 
-    command = f"java -jar {jar_path} -self {train_path} -n {n1} -r {r} -c -l < {test_path}"
+    alphabet_string = f"-alphabet file://{alphabet}" if alphabet else ""
+
+    command = f"java -jar {jar_path} -self {train_path} -n {n1} -r {r} -c -l {alphabet_string} < {test_path}"
     result = subprocess.getoutput(command)
     outputs = [float(i) for i in result.split("\n")]
 
