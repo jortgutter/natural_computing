@@ -8,7 +8,7 @@ from scipy.stats import binom
 #   return factorial(n)/(factorial(k) * factorial(n-k))
 
 
-cs = np.arange(1,21)
+cs = np.arange(1,101)
 ps = np.arange(1,10)/10
 
 for p in ps:
@@ -19,7 +19,7 @@ for p in ps:
         
         probs[i] = 1 - binom.cdf(c//2,c,p)
         print(f'p: {p} c: {c}, {c//2}, {1 - binom.cdf(c//2,c,p)}')
-    plt.plot(cs, probs, label=f"p = {p}")
+    plt.scatter(cs, probs, label=f"p = {p}")
 
 # Is this formula actually the correct one? Somehow adding more people for majority vote makes prediction worse in all cases
 plt.title(f"Probability of correct diagnosis with majority vote\nfor different values for c (group size) and p (prob. of individual being correct)")
