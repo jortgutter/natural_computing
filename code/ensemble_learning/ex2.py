@@ -1,31 +1,25 @@
 import matplotlib.pyplot as plt
-#from math import factorial
+# from math import factorial
 import numpy as np
 from scipy.stats import binom
 
+c_max = 101
 
-#def choose(n: int, k: int) -> int:
-#   return factorial(n)/(factorial(k) * factorial(n-k))
-
-
-cs = np.arange(1,101)
-ps = np.arange(1,10)/10
+cs = np.arange(1, c_max)
+ps = np.arange(1, 10) / 10
 
 for p in ps:
     probs = np.zeros(len(cs))
     for i, c in enumerate(cs):
-        #probs[i] = 1- sum([choose(c//2, k) * np.power(p, k) * np.power(1-p, c//2-k) for k in range(c//2)])
-       
-        
-        probs[i] = 1 - binom.cdf(c//2,c,p)
-        print(f'p: {p} c: {c}, {c//2}, {1 - binom.cdf(c//2,c,p)}')
-    plt.scatter(cs, probs, label=f"p = {p}")
+        probs[i] = 1 - binom.cdf(c // 2, c, p)
+        # print(f'p: {p} c: {c}, {c // 2}, {probs[i]}')
+    plt.plot(cs, probs, label=f"p = {p}")
 
-# Is this formula actually the correct one? Somehow adding more people for majority vote makes prediction worse in all cases
-plt.title(f"Probability of correct diagnosis with majority vote\nfor different values for c (group size) and p (prob. of individual being correct)")
+plt.title(f"Probability of correct diagnosis with majority vote\n"
+          f"for different values for c (group size) and p (prob. of individual being correct)")
 plt.xlabel("c")
 plt.ylabel("p")
-plt.xticks(cs)
+plt.xticks(range(0, c_max, 5))
 plt.yticks(ps)
 plt.legend()
 plt.show()
