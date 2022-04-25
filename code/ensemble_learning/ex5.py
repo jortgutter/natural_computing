@@ -8,8 +8,6 @@ from tqdm import tqdm
 import numpy as np
 
 
-
-
 iris_data = load_digits()
 
 X = iris_data['data']
@@ -22,7 +20,7 @@ max_trees = 30
 depth_steps = 5
 f_scores = np.zeros((depth_steps, N_RUNS, max_trees))
 
-
+# random forests
 for depth in range(5):
     f_scores_depth = []
     for i in tqdm(range(N_RUNS)):
@@ -38,7 +36,7 @@ for depth in range(5):
 # Decision Tree baseline
 f_scores_baselines = np.zeros((5, 10))
 for i in range(2):
-    for run in range(10):
+    for run in range(N_RUNS):
         tree = DecisionTreeClassifier(max_depth=(i+1)*5, random_state=42)
         tree.fit(X_train, y_train)
         y_hat_tree = tree.predict(X_test)
