@@ -3,6 +3,7 @@ import tensorflow as tf
 from keras.utils.np_utils import to_categorical
 from tensorflow.keras import datasets, layers, models, optimizers
 
+
 def load_data():
     (x_train, y_train), (x_test, y_test) = datasets.fashion_mnist.load_data()
 
@@ -15,6 +16,7 @@ def load_data():
     y_train = to_categorical(y_train)
     y_test = to_categorical(y_test)
     return x_train, y_train, x_test, y_test
+
 
 def define_model():
     network = models.Sequential([
@@ -30,6 +32,7 @@ def define_model():
     print(network.summary())
     return network
 
+
 def train_model(x_train, y_train, x_test, y_test):
     model = define_model()
     model.fit(x_train, y_train, epochs=10, verbose=1)
@@ -37,12 +40,9 @@ def train_model(x_train, y_train, x_test, y_test):
     _, acc = model.evaluate(x_test, y_test, verbose=1)
 
 
-
-
 def main():
     x_train, y_train, x_test, y_test = load_data()
     train_model(x_train, y_train, x_test, y_test)
-
 
 
 if __name__ == "__main__":
