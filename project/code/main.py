@@ -18,9 +18,11 @@ def load_data():
 
 def define_model():
     network = models.Sequential([
-        layers.Conv2D(32, (3,3), activation='relu', input_shape=(28, 28, 1)),
+        layers.Conv2D(32, (3,3), activation='relu', input_shape=(28, 28, 1), padding='same'),
         layers.MaxPooling2D((2,2)),
-        layers.Conv2D(64, (3,3), activation='relu'),
+        layers.Conv2D(64, (3,3), activation='relu', padding='same'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
         layers.Flatten(),
         layers.Dense(10, activation='softmax')
@@ -32,10 +34,10 @@ def define_model():
 
 def train_model(x_train, y_train, x_test, y_test):
     model = define_model()
-    model.fit(x_train, y_train, epochs=10, verbose=1)
+    history = model.fit(x_train, y_train, epochs=10, verbose=1, validation_split=0.2)
+
     print("=================================================================")
     _, acc = model.evaluate(x_test, y_test, verbose=1)
-
 
 
 
