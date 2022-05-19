@@ -37,7 +37,12 @@ def main():
     optimizer = optimizers.SGD(learning_rate=0.01, momentum=0.8)
 
     # Change to Ensemble.get_model() for other model
-    model = BaseCNN.get_model(input_shape=x_train[0].shape, n_outputs=y_train[0].shape[0], optimizer=optimizer)
+    model = BaseCNN.get_model(
+        input_shape=x_train[0].shape,
+        n_outputs=y_train[0].shape[0],
+        optimizer=optimizer,
+        dropout=True
+    )
     print(model.summary())
 
     train_model(
