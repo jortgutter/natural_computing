@@ -10,8 +10,8 @@ import custom_callbacks
 
 
 def load_data():
-    # (x_train, y_train), (x_test, y_test) = datasets.fashion_mnist.load_data()
-    (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
+    (x_train, y_train), (x_test, y_test) = datasets.fashion_mnist.load_data()
+    # (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 
     # normalize pixel values to be between 0 and 1
     x_train, x_test = x_train / 255.0, x_test / 255.0
@@ -38,7 +38,7 @@ def main():
 
     # Change to Ensemble.get_model() for other model
     model = BaseCNN.get_model(
-        input_shape=x_train[0].shape,
+        input_shape=x_train[0][:,:,None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
         n_outputs=y_train[0].shape[0],
         optimizer=optimizer,
         dropout=True
