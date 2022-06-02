@@ -2,6 +2,7 @@ from IPython.display import clear_output
 import matplotlib.pyplot as plt
 from tensorflow import keras
 
+
 class PlotLearning(keras.callbacks.Callback):
     """
     Callback to plot the learning curves of the model during training.
