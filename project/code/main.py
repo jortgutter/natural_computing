@@ -1,6 +1,9 @@
 # import keras.saving.saved_model.model_serialization
+import sklearn.model_selection
+from sklearn.model_selection import StratifiedShuffleSplit
 from keras.utils.np_utils import to_categorical
 from tensorflow.keras import datasets, optimizers
+import numpy as np
 
 # Manually defined models
 import BaseCNN
@@ -54,5 +57,25 @@ def main():
     )
 
 
+def split_data(x, y, n_nets, seed=42):
+    np.random.seed(seed=seed)
+    idx = np.arange(x.shape[0])
+    np.random.shuffle(idx)
+    idx_blocks = np.split(idx, n_nets)
+    return np.take(x, idx_blocks), np.take(y, idx_blocks)
+
+
+def ensemble_main():
+    n_nets = 5
+    seed=42
+    x_train, y_train, x_test, y_test = load_data()
+    rs = StratifiedShuffleSplit(n_splits=n_nets, test_size=0.2, random_state=seed)
+    for train_index, test_index in rs.split(x_train, y_train):
+
+        x_train_block, y_train_block = x_train[train_index], y_train[train_index]
+        x_test_block, y_test_block = x_train[test_index], y_train[test_index]
+        print(f'TRAIN: {x_train_block[0]}, TEST: {x_test_block[0]}')
+        print(f'{x_train_block[0].shape}, {x_test_block[0].shape}')
 if __name__ == "__main__":
-    main()
+    #main()
+    ensemble_main()
