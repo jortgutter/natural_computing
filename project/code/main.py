@@ -62,7 +62,7 @@ def main(args):
 
 def ensemble_main(args):
     x_train, y_train, x_test, y_test = load_data()
-    rs = StratifiedShuffleSplit(n_splits=args.n_nets, test_size=args.test_size, random_state=args.seed)
+    rs = StratifiedShuffleSplit(n_splits=args.n_nets, test_size=args.test_size, random_state=args.seed)  # TODO: smarter splits
 
     nets = [Ensemble.get_model(
         input_shape=x_train[0][:, :, None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
