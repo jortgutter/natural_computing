@@ -60,14 +60,6 @@ def main(args):
     )
 
 
-# def split_data(x, y, n_nets, seed=42):
-#     np.random.seed(seed=seed)
-#     idx = np.arange(x.shape[0])
-#     np.random.shuffle(idx)
-#     idx_blocks = np.split(idx, n_nets)
-#     return np.take(x, idx_blocks), np.take(y, idx_blocks)
-
-
 def ensemble_main(args):
     x_train, y_train, x_test, y_test = load_data()
     rs = StratifiedShuffleSplit(n_splits=args.n_nets, test_size=args.test_size, random_state=args.seed)
@@ -79,22 +71,24 @@ def ensemble_main(args):
         dropout=args.dropout
     ) for _ in range(args.n_nets)]
 
+    hists = []
+
     for i, (train_index, test_index) in enumerate(rs.split(x_train, y_train)):
         x_train_block, y_train_block = x_train[train_index], y_train[train_index]
         x_test_block, y_test_block = x_train[test_index], y_train[test_index]
 
-        history = nets[i].fit(
+        hists.append(nets[i].fit(
             x_train_block, y_train_block,
             epochs=args.epochs,
             verbose=args.verbose,
             validation_split=args.val_split,
             callbacks=args.callbacks
-        )
+        ))
 
         print(f"Evaluation of network {i}:")
         _, acc = nets[i].evaluate(x_test_block, y_test_block, verbose=args.verbose)
 
-    preds = np.array([net.predict(x_test) for net in nets]).mean(axis=0).argmax(axis=1)
+    preds = np.array([net.predict(x_test) for net in nets]).mean(axis=0).argmax(axis=1)   # TODO: majority voting
     targets = y_test.argmax(axis=1)
     accuracy = np.sum(preds == targets)/preds.size
     print(f"Ensemble accuracy using mean: {accuracy}")
