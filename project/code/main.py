@@ -1,10 +1,12 @@
 # import keras.saving.saved_model.model_serialization
-import sklearn.model_selection
 from sklearn.model_selection import StratifiedShuffleSplit
 from keras.utils.np_utils import to_categorical
 from tensorflow.keras import datasets, optimizers
 from dataclasses import dataclass
+import sklearn.model_selection
 import numpy as np
+import time
+from itertools import combinations
 
 # Manually defined models
 import BaseCNN
@@ -64,6 +66,11 @@ def ensemble_main(args):
     x_train, y_train, x_test, y_test = load_data()
     rs = StratifiedShuffleSplit(n_splits=args.n_nets, test_size=args.test_size, random_state=args.seed)  # TODO: smarter splits
 
+    # sample_list = y_test
+    # pos_combinations = []
+    # for i in range(len(sample_list)):
+    #    pos_combinations.append(combinations(sample_list, 8))
+
     nets = [Ensemble.get_model(
         input_shape=x_train[0][:, :, None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
         n_outputs=y_train[0].shape[0],
@@ -71,8 +78,11 @@ def ensemble_main(args):
         dropout=args.dropout
     ) for _ in range(args.n_nets)]
 
+    nets[0].summary()
+
     hists = []
 
+    t = time.time()
     for i, (train_index, test_index) in enumerate(rs.split(x_train, y_train)):
         x_train_block, y_train_block = x_train[train_index], y_train[train_index]
         x_test_block, y_test_block = x_train[test_index], y_train[test_index]
@@ -88,18 +98,20 @@ def ensemble_main(args):
         print(f"Evaluation of network {i}:")
         _, acc = nets[i].evaluate(x_test_block, y_test_block, verbose=args.verbose)
 
-    preds = np.array([net.predict(x_test) for net in nets]).mean(axis=0).argmax(axis=1)   # TODO: majority voting
+    print(f"Training time: {time.time() - t:.2f} seconds")
+
+    preds = np.array([net.predict(x_test) for net in nets]).sum(axis=0).argmax(axis=1)
     targets = y_test.argmax(axis=1)
     accuracy = np.sum(preds == targets)/preds.size
-    print(f"Ensemble accuracy using mean: {accuracy}")
+    print(f"Ensemble accuracy using majority voting: {accuracy}")
 
 
 @dataclass
 class Args:
-    epochs: int = 5
-    verbose: int = 0
+    epochs: int = 2
+    verbose: int = 1
     val_split: float = 0.2
-    n_nets: int = 10
+    n_nets: int = 20
     seed: int = 42
     dropout: bool = True
     test_size: float = 0.2
