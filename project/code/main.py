@@ -62,6 +62,32 @@ def main(args):
     )
 
 
+def load_ensemble_data(drop_classes):
+    (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
+
+    x_train, x_test = x_train/255.0, x_test/255.0
+
+    n_classes = len(np.unique(y_test))
+    classes = np.array(np.unique(y_test))
+
+    class_combs = np.array(list(combinations(classes, len(classes) - drop_classes)))
+    class_combs_perm = np.random.permutation(class_combs)
+
+    n_nets = len(class_combs)
+
+    all_datas=[]
+
+    for comb in class_combs_perm:
+        # get index instead of labels in following:
+        y_keep = y_train[np.isin(y_train, comb)]
+
+        # convert to one hot
+
+        # put all in list
+
+
+    return n_nets, all_datas  # data has all combinations of data that can be used by the nets
+
 def ensemble_main(args):
     x_train, y_train, x_test, y_test = load_data()
     rs = StratifiedShuffleSplit(n_splits=args.n_nets, test_size=args.test_size, random_state=args.seed)  # TODO: smarter splits
