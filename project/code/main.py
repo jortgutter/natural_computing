@@ -78,26 +78,22 @@ def load_ensemble_data(drop_classes):
     all_datas=[]
 
     for comb in class_combs_perm:
-        # get index instead of labels in following:
+        # TODO: get index instead of labels in following:
         y_keep = y_train[np.isin(y_train, comb)]
 
-        # convert to one hot
+        # TODO: convert to one hot
 
-        # put all in list
+        # TODO: put all in list
 
 
     return n_nets, all_datas  # data has all combinations of data that can be used by the nets
 
 def ensemble_main(args):
-    x_train, y_train, x_test, y_test = load_data()
+    n_nets, all_data = load_ensemble_data(drop_classes=2)  # TODO: put drop_classes in args
+
     rs = StratifiedShuffleSplit(n_splits=args.n_nets, test_size=args.test_size, random_state=args.seed)  # TODO: smarter splits
 
-    # sample_list = y_test
-    # pos_combinations = []
-    # for i in range(len(sample_list)):
-    #    pos_combinations.append(combinations(sample_list, 8))
-
-    nets = [Ensemble.get_model(
+    nets = [Ensemble.get_model(  # TODO: unpack all_data per net
         input_shape=x_train[0][:, :, None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
         n_outputs=y_train[0].shape[0],
         optimizer=args.optimizer,
