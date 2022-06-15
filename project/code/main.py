@@ -63,28 +63,44 @@ def main(args):
 
 
 def load_ensemble_data(drop_classes):
+    # load data
     (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 
+    # normalize pixel values to range(0,1)
     x_train, x_test = x_train/255.0, x_test/255.0
 
+    # get number of classes from data
     n_classes = len(np.unique(y_test))
+
+    # get list of class labels from data
     classes = np.array(np.unique(y_test))
 
-    class_combs = np.array(list(combinations(classes, len(classes) - drop_classes)))
-    class_combs_perm = np.random.permutation(class_combs)
+    # get a list of all possible combinations of classes when dropping drop_classes of them
+    class_combos = np.array(list(combinations(classes, len(classes) - drop_classes)))
+    # shuffle the lists
+    class_combos_perm = np.random.permutation(class_combos)
 
-    n_nets = len(class_combs)
+    # get number of ensemble members needed from amount of combinations
+    n_nets = len(class_combos)
+
+    # convert labels to categorical
+    y_train_cat = to_categorical(y_train)
 
     all_datas=[]
 
-    for comb in class_combs_perm:
-        # TODO: get index instead of labels in following:
-        y_keep = y_train[np.isin(y_train, comb)]
+    for combo in class_combos_perm:
+        # filter training data and labels to only contain the wanted classes
+        # get a boolean array of which samples to keep
+        indexes = np.isin(y_train, combo)
 
-        # TODO: convert to one hot
+        # change shape from (x,1) to (x,)
+        indexes = np.squeeze(indexes)
 
-        # TODO: put all in list
-
+        # filter out relevant data and save as dict in list
+        all_datas.append({
+            'X': x_train[indexes],
+            'y': y_train_cat[indexes]
+        })
 
     return n_nets, all_datas  # data has all combinations of data that can be used by the nets
 
