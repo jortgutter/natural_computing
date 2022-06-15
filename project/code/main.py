@@ -62,7 +62,7 @@ def main(args):
     )
 
 
-def load_ensemble_data(drop_classes):
+def load_ensemble_data(drop_classes: int):
     # load data
     (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 
@@ -76,9 +76,9 @@ def load_ensemble_data(drop_classes):
     classes = np.array(np.unique(y_test))
 
     # get a list of all possible combinations of classes when dropping drop_classes of them
-    class_combos = np.array(list(combinations(classes, len(classes) - drop_classes)))
+    class_combos = np.array(list(combinations(classes, n_classes - drop_classes)))
     # shuffle the lists
-    class_combos_perm = np.random.permutation(class_combos)
+    class_combos_perm = np.random.permutation(class_comb
 
     # get number of ensemble members needed from amount of combinations
     n_nets = len(class_combos)
