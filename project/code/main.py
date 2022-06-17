@@ -8,11 +8,9 @@ import numpy as np
 import time
 import sys
 
-
 # Manually defined models
 from BaseCNN import BaseCNN
 from Ensemble import Ensemble
-
 
 import custom_callbacks
 
@@ -27,8 +25,6 @@ def load_data():
     return x_train, y_train, x_test, y_test
 
 
-
-
 def main(args):
     x_train, y_train, x_test, y_test = load_data()
 
@@ -36,21 +32,14 @@ def main(args):
     model.fit(x_train, y_train, x_test, y_test)
 
 
-
-
-
-
-
-
-
-
 @dataclass
 class Args:
-    models={
+    models = {
         'Ensemble': Ensemble,
         'Base': BaseCNN
     }
-    use_model='Ensemble'
+    ensemble_method = 'dropout'
+    use_model = 'Ensemble'
     epochs: int = 2
     verbose: int = 1
     val_split: float = 0.2
@@ -67,5 +56,3 @@ class Args:
 
 if __name__ == "__main__":
     main(Args())
-    # ensemble_main(Args())
-

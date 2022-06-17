@@ -6,18 +6,18 @@ import sklearn.model_selection
 import time
 import sys
 
+
 class Ensemble():
     def __init__(self, args):
-        self.args=args
-        self.x_train, self.x_test, self.y_train, self.y_test = None, None, None, None
-
+        self.args = args
+        self.method = self.args.ensemble_method
+        self.x_train, self.y_train, self.x_test, self.y_test = None, None, None, None
 
     def get_model(self, input_shape, n_outputs, optimizer, dropout=False, n=5):
 
         # models = [single_network(input_shape, n_outputs, optimizer) for _ in range(n)]
 
         return self.single_network(input_shape, n_outputs, optimizer, dropout=dropout)
-
 
     def single_network(self, input_shape, n_outputs, optimizer, dropout=False):
         m = models.Sequential([l for l in [
@@ -51,31 +51,37 @@ class Ensemble():
         # get a list of all possible combinations of classes when dropping drop_classes of them
         self.class_combos = np.array(list(combinations(classes, n_classes - drop_classes)))
 
+    def get_data_portion(self, idx):
+        # get indices of relevant data
+        index_bools = np.isin(self.y_train, self.class_combos[idx]).squeeze()
+        print(f'size of bools: {index_bools.shape}')
+        x_train_selected = self.x_train[index_bools]
+        y_train_selected = self.y_train_cat[index_bools]
+        return x_train_selected, y_train_selected
+
     def train_ensemble(self):
-        self.nets=[]
+        self.nets = []
 
         hists = []
 
         t = time.time()
         for i in range(self.n_nets):
-            # get indices of relevant data
-            indexing= np.isin(self.y_train, self.class_combos[i])
-            x_train_selected = self.x_train[indexing]
-            y_train_selected = self.y_train_cat[indexing]
+            x_train, y_train = self.get_data_portion(i)
 
             net = self.get_model(
-                input_shape=x_train_selected[0][:, :, None].shape if len(x_train_selected[0].shape) == 2 else x_train_selected[0].shape,
-                n_outputs=y_train_selected[0].shape[0],
+                input_shape=x_train[0][:, :, None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
+                n_outputs=y_train[0].shape[0],
                 optimizer=self.args.optimizer,
                 dropout=self.args.dropout
             )
 
             self.nets.append(net)
 
-            net.summary()
+            if i == 0:
+                net.summary()
 
             hists.append(self.nets[i].fit(
-                x_train_selected, y_train_selected,
+                x_train, y_train,
                 epochs=self.args.epochs,
                 verbose=self.args.verbose,
                 validation_split=self.args.val_split,
@@ -84,29 +90,31 @@ class Ensemble():
 
             # TODO: Fix rest of this function!!
             print(f"Evaluation of network {i}:")
-            _, acc = self.nets[i].evaluate(x_test_selected, y_test_selected, verbose=self.args.verbose)
+            _, acc = self.nets[i].evaluate(self.x_test, self.y_test_cat, verbose=self.args.verbose)
 
         print(f"Training time: {time.time() - t:.2f} seconds")
 
-        preds = np.array([net.predict(x_test) for net in nets]).sum(axis=0).argmax(axis=1)
-        targets = y_test.argmax(axis=1)
+        preds = np.array([net.predict(self.x_test) for net in self.nets]).sum(axis=0).argmax(axis=1)
+        targets = self.y_test.argmax(axis=1)
         accuracy = np.sum(preds == targets) / preds.size
         print(f"Ensemble accuracy using majority voting: {accuracy}")
 
-
-    def fit(self, x_train, x_test, y_train, y_test):
+    def fit(self, x_train, y_train, x_test, y_test):
         self.x_train = x_train
-        self.x_test = x_test
         self.y_train = y_train
+        self.x_test = x_test
         self.y_train_cat = to_categorical(self.y_train)
         self.y_test = y_test
         self.y_test_cat = to_categorical(self.y_test)
 
-        # get all possible combinations of classes
-        self.create_class_combos(drop_classes=self.args.drop_classes)
+        if self.method == 'dropout':
+            # get all possible combinations of classes
+            self.create_class_combos(drop_classes=self.args.drop_classes)
 
-        # get number of ensemble members needed from amount of combinations
-        self.n_nets = len(self.class_combos)
+            # get number of ensemble members needed from amount of combinations
+            self.n_nets = len(self.class_combos)
+        else:
+            self.n_nets = self.args.n_nets
 
         # train ensemble
         self.train_ensemble()
