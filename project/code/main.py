@@ -15,21 +15,31 @@ from Ensemble import Ensemble
 import custom_callbacks
 
 
-def load_data():
+def load_data(args):
     # (x_train, y_train), (x_test, y_test) = datasets.fashion_mnist.load_data()
     (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 
     # normalize pixel values to be between 0 and 1
     x_train, x_test = x_train / 255.0, x_test / 255.0
 
-    return x_train, y_train, x_test, y_test
+    size_in = y_train.shape[0]
+    cutoff = int(args.val_split*size_in)
+    indices = np.random.permutation(size_in)
+
+    x_val = x_train[indices[:cutoff]]
+    x_train = x_train[indices[cutoff:]]
+
+    y_val = y_train[indices[:cutoff]]
+    y_train = y_train[indices[cutoff:]]
+
+    return x_train, y_train, x_val, y_val,  x_test, y_test
 
 
 def main(args):
-    x_train, y_train, x_test, y_test = load_data()
+    data = load_data(args)
 
     model = args.models[args.use_model](args)
-    model.fit(x_train, y_train, x_test, y_test)
+    model.train(data)
 
 
 @dataclass
@@ -39,10 +49,10 @@ class Args:
         'Base': BaseCNN
     }
     ensemble_method = 'dropout'
-    use_model = 'Ensemble'
+    use_model = 'Base'
     epochs: int = 2
     verbose: int = 1
-    val_split: float = 0.2
+    val_split: float = 0.1
     n_nets: int = 20
     seed: int = 42
     dropout: bool = True
