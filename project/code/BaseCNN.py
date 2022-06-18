@@ -1,6 +1,7 @@
 from tensorflow.keras import datasets, layers, models, optimizers
 from keras.utils.np_utils import to_categorical
 import os
+import time
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -13,11 +14,11 @@ class BaseCNN:
         m = models.Sequential([l for l in [
             layers.Input(shape=input_shape),
             layers.Conv2D(48, (3, 3), activation='relu', padding='same'),
-            layers.Dropout(.3),
-            layers.MaxPooling2D((2, 2)),
+            #layers.Dropout(.3),
+            # layers.MaxPooling2D((2, 2)),
             layers.Conv2D(96, (3, 3), activation='relu', padding='same'),
-            layers.Dropout(.3),
-            layers.MaxPooling2D((2, 2)),
+            #layers.Dropout(.3),
+            # layers.MaxPooling2D((2, 2)),
             layers.Conv2D(212, (3, 3), activation='relu', padding='same'),
             layers.Dropout(.3),
             layers.MaxPooling2D((2, 2)),
@@ -49,10 +50,9 @@ class BaseCNN:
             dropout=True
         )
 
-        print(self.model.summary())
+        self.model.summary()
 
-        print(x_train.shape)
-        print(y_train)
+        t = time.time()
         history = self.model.fit(
             x_train, y_train,
             epochs=self.args.epochs,
@@ -60,6 +60,8 @@ class BaseCNN:
             validation_data=(x_val, y_val),
             callbacks=self.args.callbacks
         )
+
+        print(f"Training time: {time.time() - t:.2f} seconds")
 
         print("=================================================================")
         _, acc = self.model.evaluate(x_test, y_test, verbose=self.args.verbose)

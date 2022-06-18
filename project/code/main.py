@@ -50,7 +50,7 @@ class Args:
     }
     ensemble_method = 'dropout'
     use_model = 'Base'
-    epochs: int = 2
+    epochs: int = 10
     verbose: int = 1
     val_split: float = 0.1
     n_nets: int = 20

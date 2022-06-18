@@ -11,18 +11,17 @@ class Ensemble:
     def __init__(self, args):
         self.args = args
         self.method = self.args.ensemble_method
-        self.x_train, self.y_train, self.x_test, self.y_test = None, None, None, None
 
     def single_network(self, input_shape, n_outputs, optimizer, dropout=False, name=""):
         m = models.Sequential(
             layers=[l for l in [
                 layers.Input(shape=input_shape),
                 layers.Conv2D(4, (3, 3), activation='relu', padding='same'),
-                layers.Dropout(.5),
-                layers.MaxPooling2D((2, 2)),
+                #layers.Dropout(.5),
+                # layers.MaxPooling2D((2, 2)),
                 layers.Conv2D(8, (3, 3), activation='relu', padding='same'),
-                layers.Dropout(.5),
-                layers.MaxPooling2D((2, 2)),
+                #layers.Dropout(.5),
+                # layers.MaxPooling2D((2, 2)),
                 layers.Conv2D(16, (3, 3), activation='relu', padding='same'),
                 layers.Dropout(.5),
                 layers.MaxPooling2D((2, 2)),
@@ -55,6 +54,7 @@ class Ensemble:
         y_train_selected = self.y_train_cat[index_bools]
         return x_train_selected, y_train_selected
 
+    #@profile
     def train(self, data):
         self.train_prep(data)
 
@@ -63,8 +63,10 @@ class Ensemble:
         hists = []
 
         t = time.time()
+
+        self.n_nets = 2
         for i in range(self.n_nets):
-            print(f'Start training of model {i}/{self.n_nets}')
+            print(f'Start training of model {i+1}/{self.n_nets}')
             x_train, y_train = self.get_data_portion(i)
 
             net = self.single_network(
@@ -72,7 +74,7 @@ class Ensemble:
                 n_outputs=y_train[0].shape[0],
                 optimizer=self.args.optimizer,
                 dropout=self.args.dropout,
-                name=f"Model {i}/{self.n_nets}"
+                name=f"Model_{i}_of_{self.n_nets}"
             )
 
             self.nets.append(net)
@@ -80,18 +82,18 @@ class Ensemble:
             if i == 0:
                 net.summary()
 
-            hists.append(self.nets[i].fit(
+            self.nets[i].fit(
                 x_train, y_train,
                 epochs=self.args.epochs,
                 verbose=self.args.verbose,
                 validation_data=(self.x_val, self.y_val_cat),
                 callbacks=self.args.callbacks
-            ))
+            )
 
         print(f"Training time: {time.time() - t:.2f} seconds")
 
         preds = np.array([net.predict(self.x_test) for net in self.nets]).sum(axis=0).argmax(axis=1)
-        targets = self.y_test.argmax(axis=1)
+        targets = self.y_test_cat.argmax(axis=1)
         accuracy = np.sum(preds == targets) / preds.size
         print(f"Ensemble accuracy using majority voting: {accuracy}")
 
