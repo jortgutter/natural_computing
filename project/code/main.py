@@ -48,12 +48,12 @@ class Args:
         'Ensemble': Ensemble,
         'Base': BaseCNN
     }
-    ensemble_method = 'dropout'
-    use_model = 'Base'
-    epochs: int = 10
+    ensemble_method: str = 'dropout'
+    use_model: str = 'Ensemble'
+    epochs: int = 6
     verbose: int = 1
     val_split: float = 0.1
-    n_nets: int = 20
+    n_nets: int = 20  # Max number of nets we want to use
     seed: int = 42
     dropout: bool = True
     test_size: float = 0.2

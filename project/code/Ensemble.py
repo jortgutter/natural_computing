@@ -1,14 +1,17 @@
+import keras.models
 from tensorflow.keras import datasets, layers, models, optimizers
 from keras.utils.np_utils import to_categorical
 import numpy as np
 from itertools import combinations
-import sklearn.model_selection
 import time
-import sys
+import tensorflow as tf
 
 
 class Ensemble:
     def __init__(self, args):
+        np.random.seed(args.seed)
+        tf.random.set_seed = self.args.seed
+
         self.args = args
         self.method = self.args.ensemble_method
 
@@ -16,18 +19,23 @@ class Ensemble:
         m = models.Sequential(
             layers=[l for l in [
                 layers.Input(shape=input_shape),
+
                 layers.Conv2D(4, (3, 3), activation='relu', padding='same'),
-                #layers.Dropout(.5),
+                # layers.Dropout(.5),
                 # layers.MaxPooling2D((2, 2)),
+
                 layers.Conv2D(8, (3, 3), activation='relu', padding='same'),
-                #layers.Dropout(.5),
+                # layers.Dropout(.5),
                 # layers.MaxPooling2D((2, 2)),
+
                 layers.Conv2D(16, (3, 3), activation='relu', padding='same'),
                 layers.Dropout(.5),
                 layers.MaxPooling2D((2, 2)),
+
                 layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
                 layers.Dropout(.5),
                 layers.MaxPooling2D((2, 2)),
+
                 layers.Flatten(),
                 layers.Dense(n_outputs, activation='softmax')
             ] if dropout or type(l) is not layers.Dropout],
@@ -36,6 +44,14 @@ class Ensemble:
 
         m.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
         return m
+
+    @staticmethod
+    def load_model(path):
+        return models.load_model(path)
+
+    @staticmethod
+    def store_model(model: models.Sequential, path: str):
+        model.save(path)
 
     def create_class_combos(self):
         # get list of class labels from data
@@ -46,6 +62,7 @@ class Ensemble:
 
         # get a list of all possible combinations of classes when dropping drop_classes of them
         self.class_combos = np.array(list(combinations(classes, n_classes - self.args.drop_classes)))
+        np.random.shuffle(self.class_combos)
 
     def get_data_portion(self, idx):
         # get indices of relevant data
@@ -54,7 +71,6 @@ class Ensemble:
         y_train_selected = self.y_train_cat[index_bools]
         return x_train_selected, y_train_selected
 
-    #@profile
     def train(self, data):
         self.train_prep(data)
 
@@ -64,7 +80,6 @@ class Ensemble:
 
         t = time.time()
 
-        self.n_nets = 2
         for i in range(self.n_nets):
             print(f'Start training of model {i+1}/{self.n_nets}')
             x_train, y_train = self.get_data_portion(i)
@@ -92,10 +107,33 @@ class Ensemble:
 
         print(f"Training time: {time.time() - t:.2f} seconds")
 
-        preds = np.array([net.predict(self.x_test) for net in self.nets]).sum(axis=0).argmax(axis=1)
+        ensemble_preds = np.array([net.predict(self.x_test) for net in self.nets])
         targets = self.y_test_cat.argmax(axis=1)
-        accuracy = np.sum(preds == targets) / preds.size
-        print(f"Ensemble accuracy using majority voting: {accuracy}")
+
+        print(f"Accuracy prob. median voting:\t{self.accuracy(self.prob_median_vote(ensemble_preds), targets)}")
+        print(f"Accuracy prob. majority voting:\t{self.accuracy(self.prob_majority_vote(ensemble_preds), targets)}")
+        print(f"Accuracy class majority voting:\t{self.accuracy(self.class_majority_vote(ensemble_preds), targets)}")
+
+    @staticmethod
+    def accuracy(y, t):
+        return np.sum(y == t) / t.size
+
+    @staticmethod
+    def prob_majority_vote(preds):
+        return preds.sum(axis=0).argmax(axis=1)
+
+    @staticmethod
+    def prob_median_vote(preds):
+        return np.median(preds, axis=0).argmax(axis=1)
+
+    @staticmethod
+    def class_majority_vote(preds):
+        max_preds = preds.argmax(axis=2)
+        pred = np.zeros(max_preds.shape[1])
+        for i in range(len(pred)):
+            u, counts = np.unique(max_preds[:, i], return_counts=True)
+            pred[i] = u[counts.argmax()]
+        return pred
 
     def train_prep(self, data):
         self.x_train, self.y_train, self.x_val, self.y_val, self.x_test, self.y_test_cat = data
@@ -109,6 +147,6 @@ class Ensemble:
             self.create_class_combos()
 
             # get number of ensemble members needed from amount of combinations
-            self.n_nets = len(self.class_combos)
+            self.n_nets = min(len(self.class_combos), self.args.n_nets)
         else:
             self.n_nets = self.args.n_nets

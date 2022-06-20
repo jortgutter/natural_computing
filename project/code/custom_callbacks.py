@@ -52,4 +52,4 @@ model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
 
 
 def get_callbacks():
-    return [model_checkpoint_callback, PlotLearning()]
+    return [model_checkpoint_callback,]

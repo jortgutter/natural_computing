@@ -1,0 +1,16 @@
+BaseCNN:
+- # epochs (test with early stopping? Is a callback, later used for setting args.n_epochs)
+- Change # layers
+- Different # channels (default is powers of 2)
+- Extra decision layer? (for non-linear combinations of features (no softmax activation for first))
+- Different activation functions for conv layers (relu, leaky relu, tanh)
+- Different dropout probabilities (max 0.5)
+
+Store # parameters, training-time and accuracies carefully
+
+Ensemble:
+- Error correlation
+- Test 3 classes as dropout
+- Graph of ensemble size vs accuracy
+- Graph of ensemble networks size (# layers/channels) vs accuracy
+...
