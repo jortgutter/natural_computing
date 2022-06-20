@@ -1,49 +1,22 @@
-import keras.models
-from tensorflow.keras import datasets, layers, models, optimizers
+from tensorflow.keras import models
 from keras.utils.np_utils import to_categorical
-import numpy as np
 from itertools import combinations
-import time
 import tensorflow as tf
+import numpy as np
+import util
+import time
 
 
 class Ensemble:
     def __init__(self, args):
         np.random.seed(args.seed)
-        tf.random.set_seed = self.args.seed
+        tf.random.set_seed = args.seed
 
         self.args = args
         self.method = self.args.ensemble_method
 
-    def single_network(self, input_shape, n_outputs, optimizer, dropout=False, name=""):
-        m = models.Sequential(
-            layers=[l for l in [
-                layers.Input(shape=input_shape),
-
-                layers.Conv2D(4, (3, 3), activation='relu', padding='same'),
-                # layers.Dropout(.5),
-                # layers.MaxPooling2D((2, 2)),
-
-                layers.Conv2D(8, (3, 3), activation='relu', padding='same'),
-                # layers.Dropout(.5),
-                # layers.MaxPooling2D((2, 2)),
-
-                layers.Conv2D(16, (3, 3), activation='relu', padding='same'),
-                layers.Dropout(.5),
-                layers.MaxPooling2D((2, 2)),
-
-                layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
-                layers.Dropout(.5),
-                layers.MaxPooling2D((2, 2)),
-
-                layers.Flatten(),
-                layers.Dense(n_outputs, activation='softmax')
-            ] if dropout or type(l) is not layers.Dropout],
-            name=name
-        )
-
-        m.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
-        return m
+    def single_network(self, input_shape, n_outputs, optimizer, name=""):
+        return util.get_network(input_shape, n_outputs, optimizer, self.args, name)
 
     @staticmethod
     def load_model(path):
@@ -88,7 +61,6 @@ class Ensemble:
                 input_shape=x_train[0][:, :, None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
                 n_outputs=y_train[0].shape[0],
                 optimizer=self.args.optimizer,
-                dropout=self.args.dropout,
                 name=f"Model_{i}_of_{self.n_nets}"
             )
 

@@ -1,8 +1,8 @@
-from tensorflow.keras import datasets, layers, models, optimizers
 from keras.utils.np_utils import to_categorical
-import os
-import time
 import tensorflow as tf
+import util
+import time
+import os
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -13,32 +13,8 @@ class BaseCNN:
         self.args = args
         tf.random.set_seed = self.args.seed
 
-    def set_model(self, input_shape, n_outputs, optimizer, dropout=False):
-        m = models.Sequential([l for l in [
-            layers.Input(shape=input_shape),
-
-            layers.Conv2D(48, (3, 3), activation='relu', padding='same'),
-            # layers.Dropout(.3),
-            # layers.MaxPooling2D((2, 2)),
-
-            layers.Conv2D(96, (3, 3), activation='relu', padding='same'),
-            # layers.Dropout(.3),
-            # layers.MaxPooling2D((2, 2)),
-
-            layers.Conv2D(212, (3, 3), activation='relu', padding='same'),
-            layers.Dropout(.3),
-            layers.MaxPooling2D((2, 2)),
-
-            layers.Conv2D(424, (3, 3), activation='relu', padding='same'),
-            layers.Dropout(.3),
-            layers.MaxPooling2D((2, 2)),
-
-            layers.Flatten(),
-            layers.Dense(n_outputs, activation='softmax')
-        ] if dropout or type(l) is not layers.Dropout])
-
-        m.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
-        self.model = m
+    def set_model(self, input_shape, n_outputs, optimizer):
+        self.model = util.get_network(input_shape, n_outputs, optimizer, self.args)
 
     def train(self, data):
         x_train, y_train, x_val, y_val, x_test, y_test = data
@@ -51,8 +27,7 @@ class BaseCNN:
         self.set_model(
             input_shape=x_train[0][:, :, None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
             n_outputs=y_train[0].shape[0],
-            optimizer=self.args.optimizer,
-            dropout=True
+            optimizer=self.args.optimizer
         )
 
         self.model.summary()
