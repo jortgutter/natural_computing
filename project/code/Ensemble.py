@@ -49,8 +49,6 @@ class Ensemble:
 
         self.nets = []
 
-        hists = []
-
         t = time.time()
 
         for i in range(self.n_nets):

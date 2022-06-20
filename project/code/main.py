@@ -17,6 +17,7 @@ class Args:
     ensemble_method: str = 'dropout'
     model: str = 'ensemble'
     n_conv: int = 4  # Number of convolutional blocks
+    n_decision: int = 2  # Number of dense decision layers
     start_channels: int = 32
     epochs: int = 6
     activation: str = 'relu'
@@ -68,6 +69,7 @@ if __name__ == "__main__":
     parser.add_argument('n_conv', type=int, help='Number of convolution blocks in the network')
     parser.add_argument('start_channels', type=int, help='Number of output channels of first convolution block (after that gets doubled every block)')
 
+    parser.add_argument('--n_decision', metavar='ND', type=int, default=1, help='Number of dense decision layers of the network')
     parser.add_argument('--activation', metavar='A', type=str, default='relu', help='Activation function for convolution blocks')
     parser.add_argument('--n_nets', metavar='N', type=int, default=5, help='Number of networks in ensemble')
     parser.add_argument('--ensemble_method', metavar='M', type=str, default='dropout', help='Method of distributing data to ensemble')
