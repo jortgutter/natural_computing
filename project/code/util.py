@@ -1,4 +1,5 @@
 from tensorflow.keras import datasets, layers, models, optimizers
+import os
 
 
 def get_network(input_shape, n_outputs, optimizer, args, name=None) -> models.Sequential:
@@ -27,3 +28,10 @@ def get_network(input_shape, n_outputs, optimizer, args, name=None) -> models.Se
 
     m.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
     return m
+
+def net_summary(x, out_file):
+    print(x)
+
+    with open(os.path.join('../out', out_file), 'a') as file:
+        file.write(x)
+        file.write("\n")

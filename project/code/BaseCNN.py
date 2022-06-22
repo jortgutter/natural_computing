@@ -30,10 +30,10 @@ class BaseCNN:
             optimizer=self.args.optimizer
         )
 
-        self.model.summary()
+        self.model.summary(print_fn=lambda x: util.net_summary(x, self.args.output_filename))
 
         t = time.time()
-        history = self.model.fit(
+        hist = self.model.fit(
             x_train, y_train,
             epochs=self.args.epochs,
             verbose=self.args.verbose,
@@ -41,7 +41,15 @@ class BaseCNN:
             callbacks=self.args.callbacks
         )
 
-        print(f"Training time: {time.time() - t:.2f} seconds")
+        t_train = time.time() - t
+
+        print(f"Training time: {t_train} seconds")
 
         print("=================================================================")
         _, acc = self.model.evaluate(x_test, y_test, verbose=self.args.verbose)
+
+        with open(os.path.join('../out', self.args.output_filename), 'a') as file:
+            file.write("\n".join([f"{k}: {v}" for k, v in hist.history.items()]) + "\n\n")
+            file.write(f"Training time: {t_train:.2f} seconds\n")
+            file.write(f"accuracy: {acc}")
+

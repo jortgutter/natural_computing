@@ -2,6 +2,8 @@ from tensorflow.keras import datasets, optimizers
 from dataclasses import dataclass
 import numpy as np
 import argparse
+import sys
+import os
 
 # Manually defined models
 from BaseCNN import BaseCNN
@@ -17,13 +19,14 @@ class Args:
     ensemble_method: str = 'dropout'
     model: str = 'ensemble'
     n_conv: int = 4  # Number of convolutional blocks
-    n_decision: int = 2  # Number of dense decision layers
-    start_channels: int = 32
-    epochs: int = 6
+    n_decision: int = 1  # Number of dense decision layers
+    start_channels: int = 4
+    output_filename: str = "test.txt"
+    epochs: int = 1
     activation: str = 'relu'
     verbose: int = 1
     val_split: float = 0.1
-    n_nets: int = 20  # Max number of nets we want to use
+    n_nets: int = 5  # Max number of nets we want to use
     seed: int = 42
     dropout: bool = True
     p_dropout: float = 0.3
@@ -56,18 +59,21 @@ def load_data(args: Args):
 
 
 def main(args):
+    # sys.stdout = open(os.path.join('../out', args.output_filename), 'w')
     data = load_data(args)
     model = args.models[args.model](args)
     model.train(data)
 
 
 if __name__ == "__main__":
+    # main(Args()); exit()
     parser = argparse.ArgumentParser(description='Train a network (ensemble) on CIFAR10 data and predict')
     parser.add_argument('model', help='Either \'base\' or \'ensemble\'')
     parser.add_argument('epochs', type=int, help='Number of epochs for training')
 
     parser.add_argument('n_conv', type=int, help='Number of convolution blocks in the network')
     parser.add_argument('start_channels', type=int, help='Number of output channels of first convolution block (after that gets doubled every block)')
+    parser.add_argument('output_filename', type=str, help='Name of the output file to write the training logs and results to')
 
     parser.add_argument('--n_decision', metavar='ND', type=int, default=1, help='Number of dense decision layers of the network')
     parser.add_argument('--activation', metavar='A', type=str, default='relu', help='Activation function for convolution blocks')
@@ -82,4 +88,8 @@ if __name__ == "__main__":
     parser.add_argument('--seed', metavar='SE', type=int, default=42, help='Seed used for randomness')
 
     args: argparse.Namespace = parser.parse_args()
-    main(Args(**vars(args)))  # The Args class is probably not necessary anymore with the argparser...
+    try:
+        main(Args(**vars(args)))  # The Args class is probably not necessary anymore with the argparser...
+    except Exception as e:
+        with open(os.path.join("../out", args.output_filename), 'a') as file:
+            file.write("\n\n" + str(e))

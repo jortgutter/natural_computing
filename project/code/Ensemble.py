@@ -5,6 +5,7 @@ import tensorflow as tf
 import numpy as np
 import util
 import time
+import os
 
 
 class Ensemble:
@@ -55,7 +56,7 @@ class Ensemble:
             print(f'Start training of model {i+1}/{self.n_nets}')
             x_train, y_train = self.get_data_portion(i)
 
-            net = self.single_network(
+            net: models.Sequential = self.single_network(
                 input_shape=x_train[0][:, :, None].shape if len(x_train[0].shape) == 2 else x_train[0].shape,
                 n_outputs=y_train[0].shape[0],
                 optimizer=self.args.optimizer,
@@ -65,9 +66,9 @@ class Ensemble:
             self.nets.append(net)
 
             if i == 0:
-                net.summary()
+                net.summary(print_fn=lambda x: util.net_summary(x, self.args.output_filename))
 
-            self.nets[i].fit(
+            hist = self.nets[i].fit(
                 x_train, y_train,
                 epochs=self.args.epochs,
                 verbose=self.args.verbose,
@@ -75,14 +76,28 @@ class Ensemble:
                 callbacks=self.args.callbacks
             )
 
-        print(f"Training time: {time.time() - t:.2f} seconds")
+            with open(os.path.join('../out', self.args.output_filename), 'a') as file:
+                file.write(f"===== Network {i+1}/{self.n_nets} =====\n")
+                file.write("\n".join([f"{k}: {v}" for k, v in hist.history.items()]) + "\n\n")
+
+        t_time = time.time() - t
+        with open(os.path.join('../out', self.args.output_filename), 'a') as file:
+            file.write(f"Training time: {t_time:.2f} seconds\n")
+
+        print(f"Training time: {t_time:.2f} seconds")
 
         ensemble_preds = np.array([net.predict(self.x_test) for net in self.nets])
         targets = self.y_test_cat.argmax(axis=1)
 
-        print(f"Accuracy prob. median voting:\t{self.accuracy(self.prob_median_vote(ensemble_preds), targets)}")
-        print(f"Accuracy prob. majority voting:\t{self.accuracy(self.prob_majority_vote(ensemble_preds), targets)}")
-        print(f"Accuracy class majority voting:\t{self.accuracy(self.class_majority_vote(ensemble_preds), targets)}")
+        prob_med =f"Accuracy prob. median voting:\t{self.accuracy(self.prob_median_vote(ensemble_preds), targets)}"
+        print(prob_med)
+        prob_maj = f"Accuracy prob. majority voting:\t{self.accuracy(self.prob_majority_vote(ensemble_preds), targets)}"
+        print(prob_maj)
+        class_maj = f"Accuracy class majority voting:\t{self.accuracy(self.class_majority_vote(ensemble_preds), targets)}"
+        print(class_maj)
+
+        with open(os.path.join('../out', self.args.output_filename), 'a') as file:
+            file.write(f"\n{prob_med}\n{prob_maj}\n{class_maj}\n")
 
     @staticmethod
     def accuracy(y, t):
