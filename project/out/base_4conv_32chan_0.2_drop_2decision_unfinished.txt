@@ -1,0 +1,49 @@
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ conv2d (Conv2D)             (None, 32, 32, 32)        896       
+                                                                 
+ conv2d_1 (Conv2D)           (None, 32, 32, 64)        18496     
+                                                                 
+ conv2d_2 (Conv2D)           (None, 32, 32, 128)       73856     
+                                                                 
+ dropout (Dropout)           (None, 32, 32, 128)       0         
+                                                                 
+ max_pooling2d (MaxPooling2D  (None, 16, 16, 128)      0         
+ )                                                               
+                                                                 
+ conv2d_3 (Conv2D)           (None, 16, 16, 256)       295168    
+                                                                 
+ dropout_1 (Dropout)         (None, 16, 16, 256)       0         
+                                                                 
+ max_pooling2d_1 (MaxPooling  (None, 8, 8, 256)        0         
+ 2D)                                                             
+                                                                 
+ flatten (Flatten)           (None, 16384)             0         
+                                                                 
+ dense (Dense)               (None, 8192)              134225920 
+                                                                 
+ dense_1 (Dense)             (None, 10)                81930     
+                                                                 
+=================================================================
+Total params: 134,696,266
+Trainable params: 134,696,266
+Non-trainable params: 0
+_________________________________________________________________
+Epoch 1/15
+1407/1407 [==============================] - 640s 452ms/step - loss: 1.5433 - accuracy: 0.4472 - val_loss: 1.3367 - val_accuracy: 0.5298
+Epoch 2/15
+1407/1407 [==============================] - 658s 467ms/step - loss: 0.9907 - accuracy: 0.6520 - val_loss: 0.9955 - val_accuracy: 0.6624
+Epoch 3/15
+1407/1407 [==============================] - 658s 467ms/step - loss: 0.6999 - accuracy: 0.7557 - val_loss: 0.8016 - val_accuracy: 0.7306
+Epoch 4/15
+1407/1407 [==============================] - 652s 463ms/step - loss: 0.4373 - accuracy: 0.8482 - val_loss: 0.8349 - val_accuracy: 0.7136
+Epoch 5/15
+1407/1407 [==============================] - 652s 463ms/step - loss: 0.2241 - accuracy: 0.9242 - val_loss: 0.8445 - val_accuracy: 0.7272
+Epoch 6/15
+1407/1407 [==============================] - 652s 463ms/step - loss: 0.1245 - accuracy: 0.9585 - val_loss: 0.8773 - val_accuracy: 0.7406
+Epoch 7/15
+1407/1407 [==============================] - 647s 460ms/step - loss: 0.0856 - accuracy: 0.9718 - val_loss: 0.9533 - val_accuracy: 0.7382
+Epoch 8/15
+1407/1407 [==============================] - 622s 442ms/step - loss: 0.0570 - accuracy: 0.9816 - val_loss: 0.9848 - val_accuracy: 0.7342
+
+Overfitting already!
