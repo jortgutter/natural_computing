@@ -2,7 +2,10 @@ BaseCNN:
 x # epochs (test with early stopping? Is a callback, later used for setting args.n_epochs)
 x Change # layers
 x Different # channels (default is powers of 2)
-- Extra decision layer? (for non-linear combinations of features (no softmax activation for first))
+
+x Extra decision layer? (for non-linear combinations of features (no softmax activation for first))
+   x More epochs for 2 layers
+
 x Different activation functions for conv layers (relu, leaky relu, tanh)
 x Different dropout probabilities (max 0.5)
 
