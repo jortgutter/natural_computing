@@ -1,4 +1,7 @@
 BaseCNN:
+
+Tried BatchNorm, but did not work at all :(
+
 x # epochs (test with early stopping? Is a callback, later used for setting args.n_epochs)
 x Change # layers
 x Different # channels (default is powers of 2)
@@ -11,9 +14,38 @@ x Different dropout probabilities (max 0.5)
 
 Store # parameters, training-time and accuracies carefully
 
+==================================================================================
+
+No dropout!
+Early stopping?
+
+x 4 conv layers, no dropout
+x 5 conv layers, fewer channels, no dropout
+   - 6 layers?
+
+x ADAM Optimizer
+
+==================================================================================
+
+- training time per epoch (callback)
+- base_15ep_5conv_48chan.txt
+- base_10ep_5conv_32chan.txt
+- ensemble thingies with actual printed predictions
+- ensemble_10ep_5conv_5chan_20nets.txt
+- ensemble_10ep_5conv_4chan_25nets.txt
+
 Ensemble:
+
+== Save predictions for analysis!
+
+x Start with BaseCNN with fewer channels
+- More/fewer nets
+- More/fewer channels
+- Early stopping
+(- Test 3 classes as dropout)
+(- More/fewer conv blocks)
+
 - Error correlation
-- Test 3 classes as dropout
 - Graph of ensemble size vs accuracy
 - Graph of ensemble networks size (# layers/channels) vs accuracy
 ...

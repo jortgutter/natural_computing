@@ -86,6 +86,7 @@ if __name__ == "__main__":
     parser.add_argument('--p_dropout', metavar="PD", type=float, default=0.3, help='Dropout probability')
     parser.add_argument('--silent', dest='verbose', metavar='SI', action='store_const', const=False, default=True, help='Deactivate verbosity')
     parser.add_argument('--seed', metavar='SE', type=int, default=42, help='Seed used for randomness')
+    parser.add_argument('--use_adam', dest='optimizer', action='store_const', const=optimizers.Adam(learning_rate=0.01), default=optimizers.SGD(learning_rate=0.01, momentum=0.8), help='Optimizer to use. Default: SGD')
 
     args: argparse.Namespace = parser.parse_args()
     try:

@@ -89,6 +89,11 @@ class Ensemble:
         ensemble_preds = np.array([net.predict(self.x_test) for net in self.nets])
         targets = self.y_test_cat.argmax(axis=1)
 
+        with open(os.path.join('../out', self.args.output_filename.split(".")[0] + ".preds"), 'a') as file:
+            file.write("preds: " + str(ensemble_preds.tostring()))
+            file.write("\nlabels: " + str(targets))
+
+
         prob_med =f"Accuracy prob. median voting:\t{self.accuracy(self.prob_median_vote(ensemble_preds), targets)}"
         print(prob_med)
         prob_maj = f"Accuracy prob. majority voting:\t{self.accuracy(self.prob_majority_vote(ensemble_preds), targets)}"
