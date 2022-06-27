@@ -3,6 +3,7 @@ from keras.utils.np_utils import to_categorical
 from itertools import combinations
 import tensorflow as tf
 import numpy as np
+import h5py
 import util
 import time
 import os
@@ -89,10 +90,9 @@ class Ensemble:
         ensemble_preds = np.array([net.predict(self.x_test) for net in self.nets])
         targets = self.y_test_cat.argmax(axis=1)
 
-        with open(os.path.join('../out', self.args.output_filename.split(".")[0] + ".preds"), 'a') as file:
-            file.write("preds: " + str(ensemble_preds.tostring()))
-            file.write("\nlabels: " + str(targets))
-
+        with h5py.File(os.path.join('../out', self.args.output_filename.split(".")[0] + "_preds.h5"), 'w') as file:
+            file.create_dataset("p", data=ensemble_preds)
+            file.create_dataset("y", data=targets)
 
         prob_med =f"Accuracy prob. median voting:\t{self.accuracy(self.prob_median_vote(ensemble_preds), targets)}"
         print(prob_med)

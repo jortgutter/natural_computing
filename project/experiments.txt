@@ -27,10 +27,10 @@ x ADAM Optimizer
 
 ==================================================================================
 
+x ensemble thingies with actual printed predictions (parquet output?)
 - training time per epoch (callback)
 - base_15ep_5conv_48chan.txt
-- base_10ep_5conv_32chan.txt
-- ensemble thingies with actual printed predictions
+x base_10ep_5conv_32chan.txt
 - ensemble_10ep_5conv_5chan_20nets.txt
 - ensemble_10ep_5conv_4chan_25nets.txt
 
