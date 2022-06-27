@@ -27,23 +27,12 @@ x ADAM Optimizer
 
 ==================================================================================
 
-x ensemble thingies with actual printed predictions (parquet output?)
-- training time per epoch (callback)
-- base_15ep_5conv_48chan.txt
-x base_10ep_5conv_32chan.txt
-- ensemble_10ep_5conv_5chan_20nets.txt
-- ensemble_10ep_5conv_4chan_25nets.txt
-
 Ensemble:
 
-== Save predictions for analysis!
+TODO:
+- python3 main.py ensemble 10 5 4 ensemble_6ep_5conv_4chan_25nets.txt --n_nets 25
 
-x Start with BaseCNN with fewer channels
-- More/fewer nets
-- More/fewer channels
-- Early stopping
 (- Test 3 classes as dropout)
-(- More/fewer conv blocks)
 
 - Error correlation
 - Graph of ensemble size vs accuracy
