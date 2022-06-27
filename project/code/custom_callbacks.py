@@ -1,6 +1,7 @@
 from IPython.display import clear_output
 import matplotlib.pyplot as plt
 from tensorflow import keras
+from main import Args
 
 
 class PlotLearning(keras.callbacks.Callback):
@@ -43,13 +44,18 @@ class PlotLearning(keras.callbacks.Callback):
         plt.show()
 
 
-checkpoint_filepath = '../weights/weights.{epoch:02d}-{val_accuracy:.2f}.h5'
-model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
-    filepath=checkpoint_filepath,
-    monitor='val_accuracy',
-    mode='max',
-    save_best_only=True)
+# checkpoint_filepath = '../weights/weights.{epoch:02d}-{val_accuracy:.2f}.h5'
+# model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
+#     filepath=checkpoint_filepath,
+#     monitor='val_accuracy',
+#     mode='max',
+#     save_best_only=True)
+#
+#
+# def get_callbacks():
+#     return [model_checkpoint_callback,]
 
 
-def get_callbacks():
-    return [model_checkpoint_callback,]
+def set_callbacks(args: Args):
+    if args.early_stopping:
+        args.callbacks.append(...)
