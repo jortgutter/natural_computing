@@ -36,7 +36,7 @@ class Args:
     drop_classes: int = 2
     callbacks = []
 
-    optimizer: optimizers.Optimizer = optimizers.SGD(learning_rate=0.01, momentum=0.8)
+    optimizer: optimizers.Optimizer = optimizers.SGD(learning_rate=0.03, momentum=0.8)
 
 
 def load_data(args: Args):

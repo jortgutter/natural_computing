@@ -2,6 +2,7 @@ from IPython.display import clear_output
 import matplotlib.pyplot as plt
 from tensorflow import keras
 from main import Args
+from keras.callbacks import EarlyStopping
 
 
 class PlotLearning(keras.callbacks.Callback):
@@ -58,4 +59,4 @@ class PlotLearning(keras.callbacks.Callback):
 
 def set_callbacks(args: Args):
     if args.early_stopping:
-        args.callbacks.append(...)
+        args.callbacks.append(EarlyStopping(monitor='val_loss', patience=5, verbose=1, mode="min"))
