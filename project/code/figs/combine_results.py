@@ -32,14 +32,40 @@ def base_parser(content: str):
         out[measure] = [float(val) for val in re.findall(fr"{measure}: \[([\d., ]*)]", content)[0].split(", ")]
     out["training_time"] = float(re.findall(r"Training time: (\d*\.\d*) seconds", content)[0])
     out["n_epochs"] = len(out["loss"])
-    out["accuracy"] = float(re.findall(r"accuracy: ([\d.]*)$", content)[0])
+    out["final_accuracy"] = float(re.findall(r"accuracy: ([\d.]*)$", content)[0])
 
     return out
 
 
 def ensemble_parser(content: str):
-    out = {}
+    out = dict()
 
+    out["n_nets"] = int(re.findall(r"===== Network 1/(\d*) =====", content)[0])
+    out["n_chan"] = int(re.findall(r"\(None, 32, 32, (\d*)\)", content)[0])
+    out["n_conv"] = len(re.findall(r"\n conv2d.*(Conv2D)", content))
+    out["training_time"] = float(re.findall(r"Training time: (\d*\.\d*) seconds", content)[0])
+
+    out["n_params_per_net"] = int(re.sub(",", "", re.findall(r"Trainable params: ([\d,]*)", content)[0]))
+    out["n_params"] = out["n_nets"] * out["n_params_per_net"]
+
+    out["loss"] = []
+    out["accuracy"] = []
+    out["val_loss"] = []
+    out["val_accuracy"] = []
+
+    for net in range(1, out["n_nets"] + 1):
+        results = re.findall(rf"===== Network {net}/{out['n_nets']} =====\n"
+                             rf"loss: \[([\d., ]*)]\n"
+                             rf"accuracy: \[([\d., ]*)]\n"
+                             rf"val_loss: \[([\d., ]*)]\n"
+                             rf"val_accuracy: \[([\d., ]*)]", content)
+
+        for i, measure in enumerate(["loss", "accuracy", "val_loss", "val_accuracy"]):
+            out[measure].append([float(val) for val in results[0][i].split(", ")])
+
+    out["final_accuracy_pmed"] = float(re.findall(r"Accuracy prob. median voting:\W([\d.]*)", content)[0])
+    out["final_accuracy_pmaj"] = float(re.findall(r"Accuracy prob. majority voting:\W([\d.]*)", content)[0])
+    out["final_accuracy_cmaj"] = float(re.findall(r"Accuracy class majority voting:\W([\d.]*)", content)[0])
 
     return out
 
