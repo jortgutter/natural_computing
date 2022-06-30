@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 import h5py
 
 
-filename = "../../out/ensemble_6ep_5conv_4chan_20nets_preds.h5"
+filename = "../../out/ensemble_10ep_5conv_5chan_30nets_preds.h5"
 
 
 def prediction_heatmap(predictions, y, cls, show_class=True):
@@ -17,14 +16,17 @@ def prediction_heatmap(predictions, y, cls, show_class=True):
     plt.title(f'Prediction distribution over all ensemble members for class {cls}')
     plt.show()
 
-cls=2
-arr = np.r_[0:cls, cls+1:10]
-print(arr)
 
-with h5py.File(filename, "r") as f:
+def main():
 
-    pred = f['p'][()]
-    y = f['y'][()]
+    with h5py.File(filename, "r") as f:
 
-for cls in range(10):
-    prediction_heatmap(predictions=pred, y=y, cls=cls, show_class=True)
+        pred = f['p'][()]
+        y = f['y'][()]
+
+    for cls in range(10):
+        prediction_heatmap(predictions=pred, y=y, cls=cls, show_class=True)
+
+
+if __name__ == "__main__":
+    main()
